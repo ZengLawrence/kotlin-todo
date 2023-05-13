@@ -15,11 +15,20 @@ class FunctionalTest {
         ), List::class.java)
 
     @Test
-    fun `GET to fetch todos returns list of todos`() = JavalinTest.test(app) { server, client ->
+    fun `fetch todos returns list of todos`() = JavalinTest.test(app) { _, client ->
         client.get("/todos").also {
             assertThat(it.code).isEqualTo(200)
             assertThat(it.body?.string()).isEqualTo(todosJson)
         }
     }
 
+    @Test
+    fun `get todo by id returns a todo`() = JavalinTest.test(app) { _, client ->
+        val id = 1
+        val todoJson = JavalinJackson().toJsonString(TodoDto(1, "Buy milk"), TodoDto::class.java)
+        client.get("/todos/$id").also {
+            assertThat(it.code).isEqualTo(200)
+            assertThat(it.body?.string()).isEqualTo(todoJson)
+        }
+    }
 }
