@@ -8,12 +8,16 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 11
 
+ext {
+    javalinVerison = '5.5.0'
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation("io.javalin:javalin-bundle:5.5.0")
+    implementation("io.javalin:javalin-bundle:${javalinVerison}")
 }
 
 kotlin {
