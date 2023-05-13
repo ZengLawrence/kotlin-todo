@@ -26,6 +26,12 @@ dependencies {
     implementation("io.javalin:javalin-bundle:${javalinVerison}")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 kotlin {
