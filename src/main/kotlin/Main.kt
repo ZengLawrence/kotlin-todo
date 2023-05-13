@@ -2,8 +2,8 @@ import controller.Controller
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.http.HttpStatus
-import io.javalin.openapi.plugin.OpenApiConfiguration
 import io.javalin.openapi.plugin.OpenApiPlugin
+import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.redoc.ReDocConfiguration
 import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
@@ -11,9 +11,14 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
 fun main() {
     Javalin.create { config ->
-        config.plugins.register(OpenApiPlugin(OpenApiConfiguration().apply {
-            info.title = "Todo REST Service"
-        }))
+        config.plugins.register(OpenApiPlugin(OpenApiPluginConfiguration()
+            .withDefinitionConfiguration { _, definition ->
+                definition.withOpenApiInfo { openApiInfo ->
+                    openApiInfo.title = "Todo REST Service"
+                    openApiInfo.version = "1.0.0"
+                }
+            }
+        ))
         config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
         config.plugins.register(ReDocPlugin(ReDocConfiguration()))
     }.apply {
