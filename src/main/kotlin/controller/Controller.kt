@@ -8,11 +8,10 @@ import io.javalin.openapi.*
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
 
-val todos = mutableListOf<TodoDto>(
-    TodoDto(1, "Buy milk"),
-    TodoDto(2, "Buy bread"),
-    TodoDto(3, "Take out trash"),
-)
+data class IdDto(val id: Int)
+
+val todos = mutableListOf<TodoDto>()
+
 object Controller {
 
     @OpenApi(
@@ -44,7 +43,7 @@ object Controller {
         summary = "create a new todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
-        responses = [OpenApiResponse("201")],
+        responses = [OpenApiResponse("201", [OpenApiContent(IdDto::class)])],
         path = "/todos",
         methods = [HttpMethod.POST]
     )
@@ -53,7 +52,8 @@ object Controller {
         val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
         val newTodoDto = TodoDto(nextId, request.description)
         todos += newTodoDto
-        ctx.status(HttpStatus.CREATED)
+        ctx.json(IdDto(nextId))
+            .status(HttpStatus.CREATED)
     }
 
     @OpenApi(
