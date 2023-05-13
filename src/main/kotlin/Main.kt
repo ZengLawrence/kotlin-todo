@@ -4,8 +4,6 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.http.HttpStatus
 import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
@@ -20,7 +18,6 @@ fun main() {
             }
         ))
         config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
-        config.plugins.register(ReDocPlugin(ReDocConfiguration()))
     }.apply {
         exception(Exception::class.java) { e, ctx -> e.printStackTrace() }
         error(HttpStatus.NOT_FOUND) { ctx -> ctx.json("not found") }
