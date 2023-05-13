@@ -9,7 +9,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
 class App {
 
-    val instance = Javalin.create { config ->
+    val instance: Javalin = Javalin.create { config ->
         config.plugins.register(OpenApiPlugin(OpenApiPluginConfiguration()
             .withDefinitionConfiguration { _, definition ->
                 definition.withOpenApiInfo { openApiInfo ->
@@ -32,6 +32,6 @@ class App {
                 ApiBuilder.delete(Controller::delete)
             }
         }
-    }
+    }!!
 
 }
