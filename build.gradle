@@ -1,0 +1,26 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+    id 'application'
+}
+
+group 'zeng.lawrence'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.javalin:javalin:5.5.0'
+    implementation "org.slf4j:slf4j-simple:2.0.7"
+}
+
+kotlin {
+    jvmToolchain(11)
+}
+
+application {
+    mainClassName = 'MainKt'
+}
