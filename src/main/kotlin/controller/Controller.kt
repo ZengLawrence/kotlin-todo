@@ -1,15 +1,7 @@
 package controller
 
-import io.javalin.apibuilder.ApiBuilder.*
-import io.javalin.Javalin
-import io.javalin.http.HttpStatus
+import io.javalin.http.Context
 import io.javalin.http.bodyAsClass
-import io.javalin.openapi.plugin.OpenApiConfiguration
-import io.javalin.openapi.plugin.OpenApiPlugin
-import io.javalin.openapi.plugin.redoc.ReDocConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocPlugin
-import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
-import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -19,52 +11,37 @@ val todos = mutableListOf<TodoDto>(
     TodoDto(2, "Buy bread"),
     TodoDto(3, "Take out trash"),
 )
-fun main() {
+object Controller {
 
-    val app = Javalin.create { config ->
-        config.plugins.register(OpenApiPlugin(OpenApiConfiguration().apply {
-            info.title = "Todo REST Service"
-        }))
-        config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
-        config.plugins.register(ReDocPlugin(ReDocConfiguration()))
-    }.apply {
-        exception(Exception::class.java) { e, ctx -> e.printStackTrace() }
-        error(HttpStatus.NOT_FOUND) { ctx -> ctx.json("not found") }
-    }.start(7070)
+    fun getAll(ctx: Context) {
+        ctx.json(todos)
+    }
 
-    app.routes {
+    fun get(ctx: Context) {
+        ctx.json(todos.filter { it.id == ctx.pathParam("id").toInt() })
+    }
 
-        get("/todos") { ctx ->
-            ctx.json(todos)
-        }
+    fun create(ctx: Context) {
+        val request = ctx.bodyAsClass<NewTodoDto>()
+        val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
+        val newTodoDto = TodoDto(nextId, request.description)
+        todos += newTodoDto
+        ctx.status(201)
+    }
 
-        get("/todos/{id}") { ctx ->
-            ctx.json(todos.filter { it.id == ctx.pathParam("id").toInt() })
-        }
+    fun update(ctx: Context) {
+        val todoDto = ctx.bodyAsClass<TodoDto>()
+        todos.find { it.id == ctx.pathParam("id").toInt() }
+            ?.also {
+                todos.remove(it)
+                todos.add(todoDto)
+            }
+        ctx.status(204)
+    }
 
-        post("/todos") { ctx ->
-            val request = ctx.bodyAsClass<NewTodoDto>()
-            val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
-            val newTodoDto = TodoDto(nextId, request.description)
-            todos += newTodoDto
-            ctx.status(201)
-        }
-
-        patch("/todos/{id}") { ctx ->
-            val todoDto = ctx.bodyAsClass<TodoDto>()
-            todos.find { it.id == ctx.pathParam("id").toInt() }
-                ?.also {
-                    todos.remove(it)
-                    todos.add(todoDto)
-                }
-            ctx.status(204)
-        }
-
-        delete("/todos/{id}") { ctx ->
+    fun delete(ctx: Context) {
             todos.removeIf { it.id == ctx.pathParam("id").toInt() }
             ctx.status(204)
-        }
-
     }
 
 }
