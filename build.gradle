@@ -18,6 +18,9 @@ repositories {
 
 dependencies {
     implementation("io.javalin:javalin-bundle:${javalinVerison}")
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:${javalinVerison}")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:${javalinVerison}")
+    implementation("io.javalin.community.openapi:javalin-redoc-plugin:${javalinVerison}")
 }
 
 kotlin {
