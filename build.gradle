@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+    id "org.jetbrains.kotlin.kapt" version "1.8.21"
     id 'application'
 }
 
@@ -8,13 +9,29 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 11
 
+ext {
+    javalinVerison = '5.5.0'
+    openapiVersion = '5.4.2'
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'io.javalin:javalin:5.5.0'
-    implementation "org.slf4j:slf4j-simple:2.0.7"
+
+    // annotation processor
+    kapt("io.javalin.community.openapi:openapi-annotation-processor:$openapiVersion")
+
+    implementation("io.javalin:javalin-bundle:${javalinVerison}")
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 kotlin {
