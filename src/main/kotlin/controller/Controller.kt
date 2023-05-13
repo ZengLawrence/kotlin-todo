@@ -4,6 +4,12 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.Javalin
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
+import io.javalin.openapi.plugin.OpenApiConfiguration
+import io.javalin.openapi.plugin.OpenApiPlugin
+import io.javalin.openapi.plugin.redoc.ReDocConfiguration
+import io.javalin.openapi.plugin.redoc.ReDocPlugin
+import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -15,7 +21,13 @@ val todos = mutableListOf<TodoDto>(
 )
 fun main() {
 
-    val app = Javalin.create().apply {
+    val app = Javalin.create { config ->
+        config.plugins.register(OpenApiPlugin(OpenApiConfiguration().apply {
+            info.title = "Todo REST Service"
+        }))
+        config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
+        config.plugins.register(ReDocPlugin(ReDocConfiguration()))
+    }.apply {
         exception(Exception::class.java) { e, ctx -> e.printStackTrace() }
         error(HttpStatus.NOT_FOUND) { ctx -> ctx.json("not found") }
     }.start(7070)

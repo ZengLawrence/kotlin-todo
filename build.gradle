@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+    id "org.jetbrains.kotlin.kapt" version "1.8.21"
     id 'application'
 }
 
@@ -10,6 +11,7 @@ sourceCompatibility = 11
 
 ext {
     javalinVerison = '5.5.0'
+    openapiVersion = '5.4.2'
 }
 
 repositories {
@@ -17,10 +19,14 @@ repositories {
 }
 
 dependencies {
+
+    // annotation processor
+    kapt("io.javalin.community.openapi:openapi-annotation-processor:$openapiVersion")
+
     implementation("io.javalin:javalin-bundle:${javalinVerison}")
-    implementation("io.javalin.community.openapi:javalin-openapi-plugin:${javalinVerison}")
-    implementation("io.javalin.community.openapi:javalin-swagger-plugin:${javalinVerison}")
-    implementation("io.javalin.community.openapi:javalin-redoc-plugin:${javalinVerison}")
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
+    implementation("io.javalin.community.openapi:javalin-redoc-plugin:${openapiVersion}")
 }
 
 kotlin {
