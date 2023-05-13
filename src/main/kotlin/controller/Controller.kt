@@ -1,9 +1,9 @@
 package controller
 
 import io.javalin.http.Context
+import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
-import org.eclipse.jetty.http.HttpStatus
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -37,7 +37,7 @@ object Controller {
     )
     fun get(ctx: Context) {
         todos.find { it.id == ctx.pathParam("id").toInt() }
-            ?.also { ctx.json(it) } ?: ctx.status(HttpStatus.NOT_FOUND_404)
+            ?.also { ctx.json(it) } ?: ctx.status(HttpStatus.NOT_FOUND)
     }
 
     @OpenApi(
@@ -53,7 +53,7 @@ object Controller {
         val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
         val newTodoDto = TodoDto(nextId, request.description)
         todos += newTodoDto
-        ctx.status(201)
+        ctx.status(HttpStatus.CREATED)
     }
 
     @OpenApi(
@@ -72,7 +72,7 @@ object Controller {
                 todos.remove(it)
                 todos.add(todoDto)
             }
-        ctx.status(HttpStatus.NO_CONTENT_204)
+        ctx.status(HttpStatus.NO_CONTENT)
     }
 
     @OpenApi(
@@ -85,7 +85,7 @@ object Controller {
     )
     fun delete(ctx: Context) {
             todos.removeIf { it.id == ctx.pathParam("id").toInt() }
-            ctx.status(204)
+            ctx.status(HttpStatus.NO_CONTENT)
     }
 
 }
