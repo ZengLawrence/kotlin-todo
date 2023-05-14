@@ -8,6 +8,8 @@ import io.javalin.openapi.*
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
 
+data class PatchTodoDto(val done: Boolean?)
+
 data class IdDto(val id: Int)
 
 val todos = mutableListOf<TodoDto>()
@@ -57,21 +59,24 @@ object Controller {
     }
 
     @OpenApi(
-        summary = "Update a todo",
+        summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
-        requestBody = OpenApiRequestBody([OpenApiContent(TodoDto::class)], required = true),
+        requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
         responses = [OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class)],
-        methods = [HttpMethod.PUT]
+        methods = [HttpMethod.PATCH]
     )
     fun update(ctx: Context) {
-        val todoDto = ctx.bodyAsClass<TodoDto>()
-        todos.find { it.id == ctx.pathParam("id").toInt() }
-            ?.also {
-                todos.remove(it)
-                todos.add(todoDto)
-            }
+        ctx.bodyAsClass<PatchTodoDto>().done?.let { done ->
+            todos.find { it.id == ctx.pathParam("id").toInt() }
+                ?.also {
+                    todos.remove(it)
+                    val updated = it.copy(done = done)
+                    todos.add(updated)
+                }
+        }
+
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
