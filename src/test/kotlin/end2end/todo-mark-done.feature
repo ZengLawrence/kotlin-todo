@@ -6,7 +6,7 @@ Feature: Mark a todo done
     * def todo = call read('todo-create.feature')
     * assert !todo.done
 
-  Scenario:
+  Scenario: Mark a todo done
     Given path 'todos', todo.id
     And request { done: true }
     When method PATCH
