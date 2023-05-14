@@ -8,7 +8,7 @@ Feature: Toggle done on a todo
     * assert todo.done
 
   Scenario: Mark a todo done
-    # reuse todo-mark-done.feature
+    # reuse mark done feature
     * assert todo.done
 
   Scenario: Mark a done todo undone
