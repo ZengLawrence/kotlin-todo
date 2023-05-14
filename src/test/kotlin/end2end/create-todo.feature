@@ -1,4 +1,4 @@
-Feature: Todo APIs
+Feature: Create a new todo
 
   Background:
     * url 'http://localhost:7070/'
