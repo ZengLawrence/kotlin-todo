@@ -12,9 +12,7 @@ Feature: Todo APIs
     And match $ contains { id: '#number' }
 
     * def id = response.id
-    * def expected = { id:  0, description: 'Buy milk', done: false }
-    * set expected.id = id
     Given path 'todos', id
     When method GET
     Then status 200
-    And match $ == expected
+    And match $ == { id: '#(id)', description: 'Buy milk', done: false }
