@@ -3,7 +3,7 @@ Feature: Delete a todo
   Background:
     * url baseUrl
 
-    * def todo = call read('todo-create.feature')
+    * def todo = call read('../todo-create.feature')
 
   Scenario: Delete a todo should return not found 404
     Given path 'todos', todo.id

@@ -3,7 +3,7 @@ Feature: Mark a todo done
   Background:
     * url baseUrl
 
-    * def result = call read('todo-create.feature')
+    * def result = call read('../todo-create.feature')
     * def todo = result.response
     * assert !todo.done
 
