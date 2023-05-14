@@ -68,16 +68,21 @@ object Controller {
         methods = [HttpMethod.PATCH]
     )
     fun update(ctx: Context) {
-        ctx.bodyAsClass<PatchTodoDto>().done?.let { done ->
-            todos.find { it.id == ctx.pathParam("id").toInt() }
-                ?.also {
-                    todos.remove(it)
-                    val updated = it.copy(done = done)
-                    todos.add(updated)
-                }
-        }
+        val id = ctx.pathParam("id").toInt()
+        ctx.apply {
+            bodyAsClass<PatchTodoDto>().done?.let { done ->
+                toggleDone(id, done)
+            }
+        }.status(HttpStatus.NO_CONTENT)
+    }
 
-        ctx.status(HttpStatus.NO_CONTENT)
+    private fun toggleDone(id: Int, done: Boolean) {
+        todos.find { it.id == id }
+            ?.also {
+                todos.remove(it)
+                val updated = it.copy(done = done)
+                todos.add(updated)
+            }
     }
 
     @OpenApi(
