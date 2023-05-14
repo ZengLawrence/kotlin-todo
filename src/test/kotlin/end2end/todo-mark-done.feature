@@ -3,7 +3,8 @@ Feature: Mark a todo done
   Background:
     * url baseUrl
 
-    * def todo = call read('todo-create.feature')
+    * def result = call read('todo-create.feature')
+    * def todo = result.response
     * assert !todo.done
 
   Scenario: Mark a todo done
@@ -11,3 +12,8 @@ Feature: Mark a todo done
     And request { done: true }
     When method PATCH
     Then status 204
+
+    Given path 'todos', todo.id
+    When method GET
+    Then status 200
+    And match $ contains { done: true }
