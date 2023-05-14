@@ -1,7 +1,7 @@
 Feature: Create a new todo
 
   Background:
-    * url 'http://localhost:7070/'
+    * url baseUrl
 
   Scenario: Add a new todo and get it back
 

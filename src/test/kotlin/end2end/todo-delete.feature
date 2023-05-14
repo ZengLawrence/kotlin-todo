@@ -1,7 +1,7 @@
 Feature: Delete a todo
 
   Background:
-    * url 'http://localhost:7070/'
+    * url baseUrl
 
     * def todo = call read('todo-create.feature')
 
