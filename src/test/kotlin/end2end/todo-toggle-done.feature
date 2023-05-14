@@ -1,4 +1,4 @@
-Feature: Mark a previously done todo as undone
+Feature: Toggle done on a todo
 
   Background:
     * url baseUrl
