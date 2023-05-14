@@ -1,18 +1,12 @@
-Feature: Create a new todo
+Feature: Create a new todo. This script is for reuse.
 
   Background:
     * url baseUrl
 
-  Scenario: Add a new todo and get it back
+  Scenario: Add a new todo
 
     Given path 'todos'
-    And request { description: 'Buy milk'}
+    And request { description: '#(todoDescription ? todoDescription : "Default description")'}
     When method POST
     Then status 201
     And match $ contains { id: '#number' }
-
-    * def id = response.id
-    Given path 'todos', id
-    When method GET
-    Then status 200
-    And match $ == { id: '#(id)', description: 'Buy milk', done: false }
