@@ -17,3 +17,10 @@ Feature: Mark a previously done todo as undone
     When method GET
     Then status 200
     And match $ contains { done: false }
+
+  Scenario: Does not provide 'done' attribute return Bad Request 400
+    Given path 'todos', todo.id
+    And request { id: '#(todo.id)' }
+    When method PATCH
+    Then status 400
+    And match $ contains { errorDescription: "'done' attribute is not provided" }

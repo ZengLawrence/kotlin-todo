@@ -1,5 +1,6 @@
 package controller
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -8,9 +9,12 @@ import io.javalin.openapi.*
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PatchTodoDto(val done: Boolean?)
 
 data class IdDto(val id: Int)
+
+data class Error(val errorDescription: String)
 
 val todos = mutableListOf<TodoDto>()
 
@@ -62,18 +66,21 @@ object Controller {
         summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
-        responses = [OpenApiResponse("204")],
+        responses = [OpenApiResponse("204"), OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class)],
         methods = [HttpMethod.PATCH]
     )
     fun update(ctx: Context) {
         val id = ctx.pathParam("id").toInt()
-        ctx.apply {
-            bodyAsClass<PatchTodoDto>().done?.let { done ->
-                toggleDone(id, done)
-            }
-        }.status(HttpStatus.NO_CONTENT)
+        val patchTodoDto = ctx.bodyAsClass<PatchTodoDto>()
+        if (patchTodoDto.done != null) {
+            toggleDone(id, patchTodoDto.done)
+            ctx.status(HttpStatus.NO_CONTENT)
+        } else {
+            ctx.json(Error("'done' attribute is not provided"))
+                .status(HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun toggleDone(id: Int, done: Boolean) {
