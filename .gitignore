@@ -31,6 +31,7 @@ gradlew.bat
 
 # build directory
 /build
+/target/
 
 # idea
 .idea

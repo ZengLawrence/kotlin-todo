@@ -1,5 +1,6 @@
 package controller
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -8,11 +9,15 @@ import io.javalin.openapi.*
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
 
-val todos = mutableListOf<TodoDto>(
-    TodoDto(1, "Buy milk"),
-    TodoDto(2, "Buy bread"),
-    TodoDto(3, "Take out trash"),
-)
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PatchTodoDto(val done: Boolean?)
+
+data class IdDto(val id: Int)
+
+data class Error(val errorDescription: String)
+
+val todos = mutableListOf<TodoDto>()
+
 object Controller {
 
     @OpenApi(
@@ -44,7 +49,7 @@ object Controller {
         summary = "create a new todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
-        responses = [OpenApiResponse("201")],
+        responses = [OpenApiResponse("201", [OpenApiContent(IdDto::class)])],
         path = "/todos",
         methods = [HttpMethod.POST]
     )
@@ -53,26 +58,38 @@ object Controller {
         val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
         val newTodoDto = TodoDto(nextId, request.description)
         todos += newTodoDto
-        ctx.status(HttpStatus.CREATED)
+        ctx.json(IdDto(nextId))
+            .status(HttpStatus.CREATED)
     }
 
     @OpenApi(
-        summary = "Update a todo",
+        summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
-        requestBody = OpenApiRequestBody([OpenApiContent(TodoDto::class)], required = true),
-        responses = [OpenApiResponse("204")],
+        requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
+        responses = [OpenApiResponse("204"), OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class)],
-        methods = [HttpMethod.PUT]
+        methods = [HttpMethod.PATCH]
     )
     fun update(ctx: Context) {
-        val todoDto = ctx.bodyAsClass<TodoDto>()
-        todos.find { it.id == ctx.pathParam("id").toInt() }
+        val id = ctx.pathParam("id").toInt()
+        val patchTodoDto = ctx.bodyAsClass<PatchTodoDto>()
+        if (patchTodoDto.done != null) {
+            toggleDone(id, patchTodoDto.done)
+            ctx.status(HttpStatus.NO_CONTENT)
+        } else {
+            ctx.json(Error("'done' attribute is not provided"))
+                .status(HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    private fun toggleDone(id: Int, done: Boolean) {
+        todos.find { it.id == id }
             ?.also {
                 todos.remove(it)
-                todos.add(todoDto)
+                val updated = it.copy(done = done)
+                todos.add(updated)
             }
-        ctx.status(HttpStatus.NO_CONTENT)
     }
 
     @OpenApi(

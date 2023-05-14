@@ -28,7 +28,7 @@ class App {
             ApiBuilder.post(Controller::create)
             ApiBuilder.path("{id}") {
                 ApiBuilder.get(Controller::get)
-                ApiBuilder.put(Controller::update)
+                ApiBuilder.patch(Controller::update)
                 ApiBuilder.delete(Controller::delete)
             }
         }

@@ -18,6 +18,15 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/kotlin')
+            exclude '**/*.kt'
+        }
+    }
+}
+
 dependencies {
 
     // annotation processor
@@ -28,6 +37,7 @@ dependencies {
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.0'
 }
 
 test {
