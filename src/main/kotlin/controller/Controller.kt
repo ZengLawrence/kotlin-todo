@@ -5,6 +5,8 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import todo.Todo
+import todo.TodoDomain
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -16,7 +18,9 @@ data class IdDto(val id: Int)
 
 data class Error(val errorDescription: String)
 
-val todos = mutableListOf<TodoDto>()
+fun Todo.toDto(): TodoDto {
+    return TodoDto(this.id, this.description, this.done)
+}
 
 object Controller {
 
@@ -28,7 +32,7 @@ object Controller {
         methods = [HttpMethod.GET]
     )
     fun getAll(ctx: Context) {
-        ctx.json(todos)
+        ctx.json(TodoDomain.findAll().map(Todo::toDto))
     }
 
     @OpenApi(
@@ -41,8 +45,8 @@ object Controller {
         methods = [HttpMethod.GET]
     )
     fun get(ctx: Context) {
-        todos.find { it.id == ctx.pathParam("id").toInt() }
-            ?.also { ctx.json(it) } ?: ctx.status(HttpStatus.NOT_FOUND)
+        TodoDomain.find(ctx.pathParam("id").toInt())
+            ?.also { ctx.json(it.toDto()) } ?: ctx.status(HttpStatus.NOT_FOUND)
     }
 
     @OpenApi(
@@ -55,10 +59,8 @@ object Controller {
     )
     fun create(ctx: Context) {
         val request = ctx.bodyAsClass<NewTodoDto>()
-        val nextId = todos.maxOfOrNull(TodoDto::id)?.plus(1) ?: 1
-        val newTodoDto = TodoDto(nextId, request.description)
-        todos += newTodoDto
-        ctx.json(IdDto(nextId))
+        val id = TodoDomain.add(request.description)
+        ctx.json(IdDto(id))
             .status(HttpStatus.CREATED)
     }
 
@@ -75,21 +77,12 @@ object Controller {
         val id = ctx.pathParam("id").toInt()
         val patchTodoDto = ctx.bodyAsClass<PatchTodoDto>()
         if (patchTodoDto.done != null) {
-            toggleDone(id, patchTodoDto.done)
+            TodoDomain.toggleDone(id, patchTodoDto.done)
             ctx.status(HttpStatus.NO_CONTENT)
         } else {
             ctx.json(Error("'done' attribute is not provided"))
                 .status(HttpStatus.BAD_REQUEST)
         }
-    }
-
-    private fun toggleDone(id: Int, done: Boolean) {
-        todos.find { it.id == id }
-            ?.also {
-                todos.remove(it)
-                val updated = it.copy(done = done)
-                todos.add(updated)
-            }
     }
 
     @OpenApi(
@@ -101,7 +94,7 @@ object Controller {
         methods = [HttpMethod.DELETE]
     )
     fun delete(ctx: Context) {
-            todos.removeIf { it.id == ctx.pathParam("id").toInt() }
+            TodoDomain.delete(ctx.pathParam("id").toInt())
             ctx.status(HttpStatus.NO_CONTENT)
     }
 
