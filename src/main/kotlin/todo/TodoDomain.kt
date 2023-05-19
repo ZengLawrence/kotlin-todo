@@ -5,7 +5,7 @@ data class Todo(
         val description: String,
         val done: Boolean = false)
 
-val todos = mutableListOf<Todo>();
+val todos = mutableListOf<Todo>()
 
 object TodoDomain {
 
