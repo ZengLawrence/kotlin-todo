@@ -18,7 +18,7 @@ data class IdDto(val id: Int)
 
 data class Error(val errorDescription: String)
 
-fun Todo.toDto(): TodoDto {
+private fun Todo.toDto(): TodoDto {
     return TodoDto(this.id, this.description, this.done)
 }
 
