@@ -25,7 +25,13 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     override fun find(id: Int): PTodo? {
-        TODO("Not yet implemented")
+        val map = jedis.hgetAll("todo:$id")
+        return if (map.containsKey("id")) {
+            assert(map["id"]?.toInt() == id)
+            PTodo(id, map["description"] ?: "", map["done"].toBoolean())
+        } else {
+            null
+        }
     }
 
     override fun findAll(): List<PTodo> {
