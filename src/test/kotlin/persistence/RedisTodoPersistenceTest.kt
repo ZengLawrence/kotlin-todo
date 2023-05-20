@@ -6,7 +6,6 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import redis.clients.jedis.JedisPooled
 import todo.PTodo
 import kotlin.test.Test
 
