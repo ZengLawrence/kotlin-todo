@@ -48,8 +48,11 @@ class App(todoDomain: TodoDomain) {
     }
 
     companion object {
-        fun create() = App(TodoDomain(InMemoryTodoPersistence()))
-
-        fun create(host: String, port: Int) = App(TodoDomain(RedisTodoPersistence.create(host, port)))
+        fun create(config: AppConfig = AppConfig()) =
+            config.dbConfig?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
+                ?: App(TodoDomain(InMemoryTodoPersistence()))
     }
 }
+
+data class DBConfig(val host: String, val port: Int)
+data class AppConfig(val dbConfig: DBConfig? = null)

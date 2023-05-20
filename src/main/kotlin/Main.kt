@@ -1,3 +1,3 @@
 fun main() {
-    App.create("localhost", 6379).start(7070)
+    App.create(AppConfig(DBConfig("localhost", 6379))).start(7070)
 }
