@@ -14,7 +14,7 @@ class App {
     private val todoDomain = TodoDomain(InMemoryTodoPersistence())
     private val controller = Controller(todoDomain)
 
-    val instance: Javalin = Javalin.create { config ->
+    private val instance: Javalin = Javalin.create { config ->
         config.plugins.register(OpenApiPlugin(OpenApiPluginConfiguration()
             .withDefinitionConfiguration { _, definition ->
                 definition.withOpenApiInfo { openApiInfo ->
@@ -39,4 +39,11 @@ class App {
         }
     }!!
 
+    fun start(port: Int) {
+        instance.start(port)
+    }
+
+    fun stop() {
+        instance.stop()
+    }
 }

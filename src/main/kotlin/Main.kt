@@ -1,3 +1,3 @@
 fun main() {
-    App().instance.start(7070)
+    App().start(7070)
 }
