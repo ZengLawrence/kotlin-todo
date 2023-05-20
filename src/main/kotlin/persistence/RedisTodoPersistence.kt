@@ -17,7 +17,7 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     override fun update(id: Int, done: Boolean) {
-        TODO("Not yet implemented")
+        jedis.hset("todo:$id", "done", "$done")
     }
 
     override fun delete(id: Int) {

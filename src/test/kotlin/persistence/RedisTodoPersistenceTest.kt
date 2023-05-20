@@ -57,4 +57,14 @@ class RedisTodoPersistenceTest {
         assertThat(persistence.find(id)).isNull()
     }
 
+    @Test
+    fun `update todo to done should return with done to true`() {
+        val id = persistence.insert("Buy milk", done = false)
+        val actual = persistence.find(id)
+        assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
+
+        persistence.update(id, done = true)
+        assertThat(persistence.find(id)).isEqualTo(PTodo(id, "Buy milk", done = true))
+    }
+
 }
