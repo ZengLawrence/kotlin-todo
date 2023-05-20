@@ -21,7 +21,7 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     override fun delete(id: Int) {
-        TODO("Not yet implemented")
+        jedis.del("todo:$id")
     }
 
     override fun find(id: Int): PTodo? {

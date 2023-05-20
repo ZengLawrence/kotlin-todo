@@ -46,4 +46,15 @@ class RedisTodoPersistenceTest {
     fun `find by id does not return an object`() {
         assertThat(persistence.find(-1)).isNull()
     }
+
+    @Test
+    fun `delete a todo should not return one`() {
+        val id = persistence.insert("Buy milk", done = false)
+        val actual = persistence.find(id)
+        assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
+
+        persistence.delete(id)
+        assertThat(persistence.find(id)).isNull()
+    }
+
 }
