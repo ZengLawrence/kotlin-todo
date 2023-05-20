@@ -1,6 +1,6 @@
 package end2end
 
-import App
+import App.Companion.app
 import com.intuit.karate.junit5.Karate
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -15,7 +15,7 @@ class ApiTest {
 
     companion object {
 
-        private val app = App.create()
+        private val app = app{}.build()
 
         @JvmStatic
         @BeforeAll

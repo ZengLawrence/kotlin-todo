@@ -48,9 +48,6 @@ class App(todoDomain: TodoDomain) {
     }
 
     companion object {
-        fun create(config: AppConfig = AppConfig()) =
-            config.dbConfig?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
-                ?: App(TodoDomain(InMemoryTodoPersistence()))
 
         fun app(init: AppBuilder.() -> Unit): AppBuilder {
             return AppBuilder().apply(init)
