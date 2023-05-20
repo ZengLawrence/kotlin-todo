@@ -2,6 +2,7 @@ package end2end
 
 import App
 import com.intuit.karate.junit5.Karate
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 
 
@@ -13,10 +14,19 @@ class ApiTest {
     }
 
     companion object {
+
+        private val app = App().instance
+
         @JvmStatic
         @BeforeAll
         fun setUp() {
-            App().instance.start(7070)
+            app.start(7070)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun shutDown() {
+            app.stop()
         }
     }
 
