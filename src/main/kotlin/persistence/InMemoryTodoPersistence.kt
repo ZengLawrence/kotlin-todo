@@ -23,7 +23,7 @@ class InMemoryTodoPersistence: TodoPersistence {
         }
     }
 
-    override fun delete(id: Int): Unit {
+    override fun delete(id: Int) {
         todos.removeIf { it.id == id }
     }
 
