@@ -23,8 +23,7 @@ class RedisTodoPersistenceTest {
     @BeforeEach
     @Throws(Exception::class)
     fun setUp() {
-        val jedis = JedisPooled(redis.host, redis.getMappedPort(6379))
-        persistence = RedisTodoPersistence(jedis)
+        persistence = RedisTodoPersistence.create(redis.host, redis.getMappedPort(6379))
     }
 
 
