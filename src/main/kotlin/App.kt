@@ -7,6 +7,7 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import persistence.InMemoryTodoPersistence
+import persistence.RedisTodoPersistence
 import todo.TodoDomain
 
 class App(todoDomain: TodoDomain) {
@@ -48,5 +49,7 @@ class App(todoDomain: TodoDomain) {
 
     companion object {
         fun create() = App(TodoDomain(InMemoryTodoPersistence()))
+
+        fun create(host: String, port: Int) = App(TodoDomain(RedisTodoPersistence.create(host, port)))
     }
 }

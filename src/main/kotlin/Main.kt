@@ -1,3 +1,3 @@
 fun main() {
-    App.create().start(7070)
+    App.create("localhost", 6379).start(7070)
 }
