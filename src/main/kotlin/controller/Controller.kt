@@ -23,9 +23,7 @@ private fun Todo.toDto(): TodoDto {
     return TodoDto(this.id, this.description, this.done)
 }
 
-private val todoDomain = TodoDomain(InMemoryTodoPersistence())
-
-object Controller {
+class Controller(private val todoDomain: TodoDomain) {
 
     @OpenApi(
         summary = "Get all todos",

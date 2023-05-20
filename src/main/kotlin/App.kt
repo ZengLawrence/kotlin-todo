@@ -6,8 +6,13 @@ import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
+import persistence.InMemoryTodoPersistence
+import todo.TodoDomain
 
 class App {
+
+    private val todoDomain = TodoDomain(InMemoryTodoPersistence())
+    private val controller = Controller(todoDomain)
 
     val instance: Javalin = Javalin.create { config ->
         config.plugins.register(OpenApiPlugin(OpenApiPluginConfiguration()
@@ -24,12 +29,12 @@ class App {
         error(HttpStatus.NOT_FOUND) { ctx -> ctx.json("not found") }
     }.routes {
         ApiBuilder.path("todos") {
-            ApiBuilder.get(Controller::getAll)
-            ApiBuilder.post(Controller::create)
+            ApiBuilder.get(controller::getAll)
+            ApiBuilder.post(controller::create)
             ApiBuilder.path("{id}") {
-                ApiBuilder.get(Controller::get)
-                ApiBuilder.patch(Controller::update)
-                ApiBuilder.delete(Controller::delete)
+                ApiBuilder.get(controller::get)
+                ApiBuilder.patch(controller::update)
+                ApiBuilder.delete(controller::delete)
             }
         }
     }!!
