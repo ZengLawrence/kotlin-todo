@@ -12,20 +12,20 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
             "description" to description,
             "done" to "$done"
         )
-        jedis.hset("todo:$id", value)
+        jedis.hset(key(id), value)
         return id
     }
 
     override fun update(id: Int, done: Boolean) {
-        jedis.hset("todo:$id", "done", "$done")
+        jedis.hset(key(id), "done", "$done")
     }
 
     override fun delete(id: Int) {
-        jedis.del("todo:$id")
+        jedis.del(key(id))
     }
 
     override fun find(id: Int): PTodo? {
-        val map = jedis.hgetAll("todo:$id")
+        val map = jedis.hgetAll(key(id))
         return if (map.containsKey("id")) {
             assert(map["id"]?.toInt() == id)
             PTodo(id, map["description"] ?: "", map["done"].toBoolean())
@@ -37,4 +37,6 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     override fun findAll(): List<PTodo> {
         TODO("Not yet implemented")
     }
+
+    private fun key(id: Int) = "todo:$id"
 }
