@@ -5,7 +5,6 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
-import persistence.InMemoryTodoPersistence
 import todo.Todo
 import todo.TodoDomain
 
