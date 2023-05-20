@@ -4,6 +4,10 @@ import redis.clients.jedis.UnifiedJedis
 import todo.PTodo
 import todo.TodoPersistence
 
+/**
+ * Redis based persistence implementation. This implementation is used for local develop only and
+ * not intend to be efficient.
+ */
 class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     override fun insert(description: String, done: Boolean): Int {
         val id = jedis.incr("todo-id").toInt()
@@ -13,6 +17,7 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
             "done" to "$done"
         )
         jedis.hset(key(id), value)
+        jedis.rpush("todo-ids", "$id")
         return id
     }
 
@@ -21,6 +26,7 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     override fun delete(id: Int) {
+        jedis.lrem("todo-ids", 1, "$id")
         jedis.del(key(id))
     }
 
@@ -35,7 +41,9 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     override fun findAll(): List<PTodo> {
-        TODO("Not yet implemented")
+        return jedis.lrange("todo-ids", 0, -1).map {
+            find(it.toInt())!!
+        }
     }
 
     private fun key(id: Int) = "todo:$id"

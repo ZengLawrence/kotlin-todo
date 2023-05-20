@@ -67,4 +67,19 @@ class RedisTodoPersistenceTest {
         assertThat(persistence.find(id)).isEqualTo(PTodo(id, "Buy milk", done = true))
     }
 
+    @Test
+    fun `find all should return all todos`() {
+        val id1 = persistence.insert("Buy milk", done = false)
+        val id2 = persistence.insert("Get newspaper", done = true)
+        val id3 = persistence.insert("Eat lunch", done = false)
+
+        assertThat(persistence.findAll()).containsOnlyElementsOf(
+            listOf(
+                PTodo(id1, "Buy milk", done = false),
+                PTodo(id2, "Get newspaper", done = true),
+                PTodo(id3, "Eat lunch", done = false)
+            )
+        )
+    }
+
 }
