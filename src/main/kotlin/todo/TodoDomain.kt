@@ -5,30 +5,25 @@ data class Todo(
         val description: String,
         val done: Boolean = false)
 
-val todos = mutableListOf<Todo>()
+private fun PTodo.toDomain() =
+    Todo(this.id, this.description, this.done)
 
-object TodoDomain {
-
-    private fun nextId() = todos.maxOfOrNull(Todo::id)?.plus(1) ?: 1
+class TodoDomain(private val persistence: TodoPersistence) {
 
     fun add(description: String): Int {
-        val id = nextId()
-        todos += Todo(id, description)
-        return id
+        return persistence.insert(description, done = false)
     }
 
-    fun find(id: Int): Todo? = todos.find { it.id == id }
+    fun find(id: Int): Todo? = persistence.find(id)?.toDomain()
 
-    fun findAll(): List<Todo> = todos.toList()
+    fun findAll(): List<Todo> = persistence.findAll().map(PTodo::toDomain)
 
-     fun toggleDone(id: Int, done: Boolean) {
+    fun toggleDone(id: Int, done: Boolean) {
         find(id)?.also {
-                todos.remove(it)
-                val updated = it.copy(done = done)
-                todos.add(updated)
+                persistence.update(id, done)
             }
     }
 
-    fun delete(id: Int): Boolean = todos.removeIf { it.id == id }
+    fun delete(id: Int) = persistence.delete(id)
 
 }

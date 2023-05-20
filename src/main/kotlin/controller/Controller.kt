@@ -5,6 +5,7 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import persistence.InMemoryTodoPersistence
 import todo.Todo
 import todo.TodoDomain
 
@@ -22,6 +23,8 @@ private fun Todo.toDto(): TodoDto {
     return TodoDto(this.id, this.description, this.done)
 }
 
+private val todoDomain = TodoDomain(InMemoryTodoPersistence())
+
 object Controller {
 
     @OpenApi(
@@ -32,7 +35,7 @@ object Controller {
         methods = [HttpMethod.GET]
     )
     fun getAll(ctx: Context) {
-        ctx.json(TodoDomain.findAll().map(Todo::toDto))
+        ctx.json(todoDomain.findAll().map(Todo::toDto))
     }
 
     @OpenApi(
@@ -45,7 +48,7 @@ object Controller {
         methods = [HttpMethod.GET]
     )
     fun get(ctx: Context) {
-        TodoDomain.find(ctx.pathParam("id").toInt())
+        todoDomain.find(ctx.pathParam("id").toInt())
             ?.also { ctx.json(it.toDto()) } ?: ctx.status(HttpStatus.NOT_FOUND)
     }
 
@@ -59,7 +62,7 @@ object Controller {
     )
     fun create(ctx: Context) {
         val request = ctx.bodyAsClass<NewTodoDto>()
-        val id = TodoDomain.add(request.description)
+        val id = todoDomain.add(request.description)
         ctx.json(IdDto(id))
             .status(HttpStatus.CREATED)
     }
@@ -77,7 +80,7 @@ object Controller {
         val id = ctx.pathParam("id").toInt()
         val patchTodoDto = ctx.bodyAsClass<PatchTodoDto>()
         if (patchTodoDto.done != null) {
-            TodoDomain.toggleDone(id, patchTodoDto.done)
+            todoDomain.toggleDone(id, patchTodoDto.done)
             ctx.status(HttpStatus.NO_CONTENT)
         } else {
             ctx.json(Error("'done' attribute is not provided"))
@@ -94,7 +97,7 @@ object Controller {
         methods = [HttpMethod.DELETE]
     )
     fun delete(ctx: Context) {
-            TodoDomain.delete(ctx.pathParam("id").toInt())
+            todoDomain.delete(ctx.pathParam("id").toInt())
             ctx.status(HttpStatus.NO_CONTENT)
     }
 
