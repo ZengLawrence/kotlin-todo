@@ -83,6 +83,3 @@ class App(todoDomain: TodoDomain) {
         }
     }
 }
-
-data class DBConfig(val host: String, val port: Int)
-data class AppConfig(val dbConfig: DBConfig? = null)
