@@ -9,9 +9,8 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import persistence.InMemoryTodoPersistence
 import todo.TodoDomain
 
-class App {
+class App(todoDomain: TodoDomain) {
 
-    private val todoDomain = TodoDomain(InMemoryTodoPersistence())
     private val controller = Controller(todoDomain)
 
     private val instance: Javalin = Javalin.create { config ->
@@ -45,5 +44,9 @@ class App {
 
     fun stop() {
         instance.stop()
+    }
+
+    companion object {
+        fun create() = App(TodoDomain(InMemoryTodoPersistence()))
     }
 }

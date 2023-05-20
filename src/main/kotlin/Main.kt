@@ -1,3 +1,3 @@
 fun main() {
-    App().start(7070)
+    App.create().start(7070)
 }

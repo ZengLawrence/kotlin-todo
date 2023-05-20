@@ -15,7 +15,7 @@ class ApiTest {
 
     companion object {
 
-        private val app = App()
+        private val app = App.create()
 
         @JvmStatic
         @BeforeAll
