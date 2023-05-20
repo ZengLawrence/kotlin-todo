@@ -7,14 +7,14 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import persistence.InMemoryTodoPersistence
+import persistence.RedisTodoPersistence
 import todo.TodoDomain
 
-class App {
+class App(todoDomain: TodoDomain) {
 
-    private val todoDomain = TodoDomain(InMemoryTodoPersistence())
     private val controller = Controller(todoDomain)
 
-    val instance: Javalin = Javalin.create { config ->
+    private val instance: Javalin = Javalin.create { config ->
         config.plugins.register(OpenApiPlugin(OpenApiPluginConfiguration()
             .withDefinitionConfiguration { _, definition ->
                 definition.withOpenApiInfo { openApiInfo ->
@@ -39,4 +39,47 @@ class App {
         }
     }!!
 
+    fun start(port: Int) {
+        instance.start(port)
+    }
+
+    fun stop() {
+        instance.stop()
+    }
+
+    companion object {
+
+        fun app(init: AppBuilder.() -> Unit): AppBuilder {
+            return AppBuilder().apply(init)
+        }
+
+    }
+
+    class AppBuilder {
+
+        private var db: DB? = null
+
+        fun build(): App {
+            return db?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
+                ?: App(TodoDomain(InMemoryTodoPersistence()))
+        }
+
+        fun db(init: DB.() -> Unit) {
+            db = DB().apply(init)
+        }
+    }
+
+    class DB {
+
+        internal var host: String = "localhost"
+        internal var port: Int = 0
+
+        fun host(host: String) {
+            this.host = host
+        }
+
+        fun port(port: Int) {
+            this.port = port
+        }
+    }
 }

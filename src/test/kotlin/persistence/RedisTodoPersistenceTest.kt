@@ -6,7 +6,6 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import redis.clients.jedis.JedisPooled
 import todo.PTodo
 import kotlin.test.Test
 
@@ -23,8 +22,7 @@ class RedisTodoPersistenceTest {
     @BeforeEach
     @Throws(Exception::class)
     fun setUp() {
-        val jedis = JedisPooled(redis.host, redis.getMappedPort(6379))
-        persistence = RedisTodoPersistence(jedis)
+        persistence = RedisTodoPersistence.create(redis.host, redis.getMappedPort(6379))
     }
 
 

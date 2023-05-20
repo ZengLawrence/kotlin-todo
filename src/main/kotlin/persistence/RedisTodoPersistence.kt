@@ -1,5 +1,6 @@
 package persistence
 
+import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.UnifiedJedis
 import todo.PTodo
 import todo.TodoPersistence
@@ -47,4 +48,8 @@ class RedisTodoPersistence(private val jedis: UnifiedJedis): TodoPersistence {
     }
 
     private fun key(id: Int) = "todo:$id"
+
+    companion object {
+        fun create(host: String, port: Int) = RedisTodoPersistence(JedisPooled(host, port))
+    }
 }
