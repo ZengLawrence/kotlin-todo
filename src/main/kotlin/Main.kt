@@ -1,3 +1,12 @@
+import App.Companion.app
+
 fun main() {
-    App.create(AppConfig(DBConfig("localhost", 6379))).start(7070)
+
+    app {
+        db {
+            host("localhost")
+            port(6379)
+        }
+    }.build()
+        .start(7070)
 }
