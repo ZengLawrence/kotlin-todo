@@ -1,6 +1,6 @@
 package end2end
 
-import App.Companion.app
+import app.App.Companion.app
 import com.intuit.karate.junit5.Karate
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

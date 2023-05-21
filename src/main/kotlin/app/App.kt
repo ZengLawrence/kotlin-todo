@@ -1,3 +1,5 @@
+package app
+
 import controller.Controller
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder
@@ -6,8 +8,6 @@ import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
-import persistence.InMemoryTodoPersistence
-import persistence.RedisTodoPersistence
 import todo.TodoDomain
 
 class App(todoDomain: TodoDomain) {
@@ -55,31 +55,4 @@ class App(todoDomain: TodoDomain) {
 
     }
 
-    class AppBuilder {
-
-        private var db: DB? = null
-
-        fun build(): App {
-            return db?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
-                ?: App(TodoDomain(InMemoryTodoPersistence()))
-        }
-
-        fun db(init: DB.() -> Unit) {
-            db = DB().apply(init)
-        }
-    }
-
-    class DB {
-
-        internal var host: String = "localhost"
-        internal var port: Int = 0
-
-        fun host(host: String) {
-            this.host = host
-        }
-
-        fun port(port: Int) {
-            this.port = port
-        }
-    }
 }
