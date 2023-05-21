@@ -1,4 +1,4 @@
-import App.Companion.app
+import app.App.Companion.app
 
 fun main() {
 

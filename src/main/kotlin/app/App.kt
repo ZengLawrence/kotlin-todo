@@ -1,3 +1,5 @@
+package app
+
 import controller.Controller
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder
