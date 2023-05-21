@@ -3,7 +3,7 @@ import app.App.Companion.app
 fun main() {
 
     app {
-        db {
+        redis {
             host("localhost")
             port(6379)
         }
