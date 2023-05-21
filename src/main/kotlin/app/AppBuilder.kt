@@ -9,8 +9,12 @@ interface Builder<T> {
     fun build(): T
 }
 
+/**
+ * DSL for building App. All components should implement Builder<T> interface.
+ */
 class AppBuilder: Builder<App> {
 
+    // default db implementation to be in memory.
     private var dbBuilder: Builder<TodoPersistence> = InMemoryDBBuilder()
 
     override fun build(): App = App(TodoDomain(dbBuilder.build()))
