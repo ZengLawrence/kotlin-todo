@@ -4,11 +4,15 @@ import persistence.InMemoryTodoPersistence
 import persistence.RedisTodoPersistence
 import todo.TodoDomain
 
-class AppBuilder {
+interface Builder<T> {
+    fun build(): T
+}
+
+class AppBuilder: Builder<App> {
 
     private var db: DB? = null
 
-    fun build(): App {
+    override fun build(): App {
         return db?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
             ?: App(TodoDomain(InMemoryTodoPersistence()))
     }
