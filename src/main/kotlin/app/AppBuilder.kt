@@ -3,6 +3,7 @@ package app
 import persistence.InMemoryTodoPersistence
 import persistence.RedisTodoPersistence
 import todo.TodoDomain
+import todo.TodoPersistence
 
 interface Builder<T> {
     fun build(): T
@@ -10,22 +11,19 @@ interface Builder<T> {
 
 class AppBuilder: Builder<App> {
 
-    private var db: DB? = null
+    private val dbBuilder: DBBuilder = DBBuilder()
 
-    override fun build(): App {
-        return db?.let { db -> App(TodoDomain(RedisTodoPersistence.create(db.host, db.port))) }
-            ?: App(TodoDomain(InMemoryTodoPersistence()))
-    }
+    override fun build(): App = App(TodoDomain(dbBuilder.build()))
 
-    fun db(init: DB.() -> Unit) {
-        db = DB().apply(init)
+    fun db(init: DBBuilder.() -> Unit) {
+        dbBuilder.apply(init)
     }
 }
 
-class DB {
+class DBBuilder: Builder<TodoPersistence> {
 
-    internal var host: String = "localhost"
-    internal var port: Int = 0
+    private var host: String = "localhost"
+    private var port: Int = 0
 
     fun host(host: String) {
         this.host = host
@@ -34,4 +32,12 @@ class DB {
     fun port(port: Int) {
         this.port = port
     }
+
+    override fun build(): TodoPersistence =
+        if (port > 0) {
+            RedisTodoPersistence.create(host, port)
+        } else {
+            InMemoryTodoPersistence()
+        }
+
 }
