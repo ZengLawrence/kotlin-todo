@@ -55,3 +55,11 @@ kotlin {
 application {
     mainClassName = 'MainKt'
 }
+
+task installRedis(type:Exec) {
+    commandLine 'sh', '-c', 'docker run --name todo-redis -d -p 6379:6379 redis:alpine'
+}
+
+task startRedis(type:Exec) {
+    commandLine 'sh', '-c', 'docker start todo-redis'
+}
