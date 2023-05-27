@@ -2,6 +2,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.0'
     id "org.jetbrains.kotlin.kapt" version "1.8.21"
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
+    id 'jvm-test-suite'
 }
 
 group 'zeng.lawrence'
@@ -18,15 +21,6 @@ repositories {
     mavenCentral()
 }
 
-sourceSets {
-    test {
-        resources {
-            srcDir file('src/test/kotlin')
-            exclude '**/*.kt'
-        }
-    }
-}
-
 dependencies {
 
     // annotation processor
@@ -39,13 +33,42 @@ dependencies {
 
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.assertj:assertj-core:3.11.1'
-    testImplementation 'com.intuit.karate:karate-junit5:1.4.0'
     testImplementation "org.testcontainers:testcontainers:1.18.1"
     testImplementation "org.testcontainers:junit-jupiter:1.18.1"
 }
 
-test {
-    useJUnitPlatform()
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+
+        integrationTest(JvmTestSuite) {
+            dependencies {
+                implementation project()
+                implementation 'com.intuit.karate:karate-junit5:1.4.0'
+            }
+
+            sources {
+                resources {
+                    srcDir file('src/integrationTest/kotlin')
+                    exclude '**/*.kt'
+                }
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn(testing.suites.integrationTest)
 }
 
 kotlin {
@@ -56,10 +79,28 @@ application {
     mainClassName = 'MainKt'
 }
 
-task installRedis(type:Exec) {
+tasks.register('installRedis', Exec) {
     commandLine 'sh', '-c', 'docker run --name todo-redis -d -p 6379:6379 redis:alpine'
 }
 
-task startRedis(type:Exec) {
+tasks.register('startRedis', Exec) {
     commandLine 'sh', '-c', 'docker start todo-redis'
+}
+
+tasks.register('buildImage', Exec) {
+    dependsOn 'installDist'
+    commandLine 'sh', '-c', 'docker build -t kotlin-todo .'
+}
+
+tasks.register('removeImage', Exec) {
+    commandLine 'sh', '-c', 'docker rmi kotlin-todo'
+}
+
+tasks.register('startContainer', Exec) {
+    dependsOn 'buildImage'
+    commandLine 'sh', '-c', 'docker compose up -d'
+}
+
+tasks.register('shutDownContainer', Exec) {
+    commandLine 'sh', '-c', 'docker compose down'
 }

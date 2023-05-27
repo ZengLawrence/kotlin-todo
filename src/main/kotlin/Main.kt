@@ -4,8 +4,8 @@ fun main() {
 
     app {
         redis {
-            host("localhost")
-            port(6379)
+            host(System.getenv("REDIS_HOST") ?: "localhost")
+            port(System.getenv("REDIS_PORT")?.toInt() ?: 6379)
         }
     }.build()
         .start(7070)
