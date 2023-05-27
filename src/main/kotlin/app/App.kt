@@ -25,7 +25,10 @@ class App(todoDomain: TodoDomain) {
         ))
         config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
     }.apply {
-        exception(Exception::class.java) { e, ctx -> e.printStackTrace() }
+        exception(Exception::class.java) { e, ctx ->
+            e.printStackTrace()
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
         error(HttpStatus.NOT_FOUND) { ctx -> ctx.json("not found") }
     }.routes {
         ApiBuilder.path("todos") {
