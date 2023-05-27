@@ -4,6 +4,7 @@ plugins {
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
+    id 'jvm-test-suite'
 }
 
 group 'zeng.lawrence'
@@ -46,8 +47,30 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter:1.18.1"
 }
 
-test {
-    useJUnitPlatform()
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+
+        integrationTest(JvmTestSuite) {
+            dependencies {
+                implementation project()
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn(testing.suites.integrationTest)
 }
 
 kotlin {
