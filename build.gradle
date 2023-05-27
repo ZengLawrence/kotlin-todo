@@ -71,6 +71,10 @@ tasks.register('buildImage', Exec) {
     commandLine 'sh', '-c', 'docker build -t kotlin-todo .'
 }
 
+tasks.register('removeImage', Exec) {
+    commandLine 'sh', '-c', 'docker rmi kotlin-todo'
+}
+
 tasks.register('startContainer', Exec) {
     dependsOn 'buildImage'
     commandLine 'sh', '-c', 'docker compose up -d'

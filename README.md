@@ -13,10 +13,13 @@ Todo list REST service using Kotlin.
 
 # Docker image
 ## Build image
-Run `./gradlew buildImage` to build image
+Run `./gradlew buildImage` to build image. Docker does not overwrite image each time it is built. See [Remove image](#remove-image) section below.
 
 ## Start container
 Run `./gradlew startContainer` to start container with Redis service as database.
 
 ## Shut down container
 Run `./gradlew shutDownContainer` to stop and remove container.
+
+## Remove image
+Run `./gradlew removeImage` to remove image.
