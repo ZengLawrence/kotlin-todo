@@ -65,3 +65,8 @@ tasks.register('installRedis', Exec) {
 tasks.register('startRedis', Exec) {
     commandLine 'sh', '-c', 'docker start todo-redis'
 }
+
+tasks.register('buildImage', Exec) {
+    dependsOn 'installDist'
+    commandLine 'sh', '-c', 'docker build -t kotlin-todo .'
+}
