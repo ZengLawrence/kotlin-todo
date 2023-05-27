@@ -58,10 +58,10 @@ application {
     mainClassName = 'MainKt'
 }
 
-task installRedis(type:Exec) {
+tasks.register('installRedis', Exec) {
     commandLine 'sh', '-c', 'docker run --name todo-redis -d -p 6379:6379 redis:alpine'
 }
 
-task startRedis(type:Exec) {
+tasks.register('startRedis', Exec) {
     commandLine 'sh', '-c', 'docker start todo-redis'
 }
