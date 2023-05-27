@@ -70,3 +70,12 @@ tasks.register('buildImage', Exec) {
     dependsOn 'installDist'
     commandLine 'sh', '-c', 'docker build -t kotlin-todo .'
 }
+
+tasks.register('startContainer', Exec) {
+    dependsOn 'buildImage'
+    commandLine 'sh', '-c', 'docker compose up -d'
+}
+
+tasks.register('shutDownContainer', Exec) {
+    commandLine 'sh', '-c', 'docker compose down'
+}

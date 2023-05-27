@@ -11,5 +11,12 @@ Todo list REST service using Kotlin.
 1. If Redis is stopped, run task `./gradlew startRedis` first.
 2. Run `./gradlew run`
 
-# Docker Image
-1. Run `./gradlew buildImage` to build image
+# Docker image
+## Build image
+Run `./gradlew buildImage` to build image
+
+## Start container
+Run `./gradlew startContainer` to start container with Redis service as database.
+
+## Shut down container
+Run `./gradlew shutDownContainer` to stop and remove container.
