@@ -2,7 +2,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.8.0"
     id("org.jetbrains.kotlin.kapt") version "1.8.21"
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     java
     `jvm-test-suite`
 }
