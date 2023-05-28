@@ -7,15 +7,15 @@ plugins {
     id("jvm-test-suite")
 }
 
-group "zeng.lawrence"
-version "1.0-SNAPSHOT"
+group = "zeng.lawrence"
+version = "1.0-SNAPSHOT"
 
-sourceCompatibility = 11
-
-ext {
-    javalinVerison = "5.5.0"
-    openapiVersion = "5.4.2"
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
 }
+
+val javalinVerison by extra("5.5.0")
+val openapiVersion by extra("5.4.2")
 
 repositories {
     mavenCentral()
@@ -39,11 +39,11 @@ dependencies {
 
 testing {
     suites {
-        test {
+        val test by getting(JvmTestSuite::class) {
             useJUnitJupiter()
         }
 
-        integrationTest(JvmTestSuite) {
+        register<JvmTestSuite>("integrationTest") {
             dependencies {
                 implementation(project())
                 implementation("com.intuit.karate:karate-junit5:1.4.0")
@@ -68,7 +68,7 @@ testing {
 }
 
 tasks.named("check") {
-    dependsOn(testing.suites.integrationTest)
+    dependsOn(testing.suites.named("integrationTest"))
 }
 
 kotlin {
@@ -76,31 +76,31 @@ kotlin {
 }
 
 application {
-    mainClassName = "MainKt"
+    mainClass.set("MainKt")
 }
 
-tasks.register("installRedis", Exec) {
+tasks.register("installRedis", Exec::class.java) {
     commandLine("sh", "-c", "docker run --name todo-redis -d -p 6379:6379 redis:alpine")
 }
 
-tasks.register("startRedis", Exec) {
+tasks.register("startRedis", Exec::class.java) {
     commandLine("sh", "-c", "docker start todo-redis")
 }
 
-tasks.register("buildImage", Exec) {
+tasks.register("buildImage", Exec::class.java) {
     dependsOn("installDist")
     commandLine("sh", "-c", "docker build -t kotlin-todo .")
 }
 
-tasks.register("removeImage", Exec) {
+tasks.register("removeImage", Exec::class.java) {
     commandLine("sh", "-c", "docker rmi kotlin-todo")
 }
 
-tasks.register("startContainer", Exec) {
+tasks.register("startContainer", Exec::class.java) {
     dependsOn("buildImage")
     commandLine("sh", "-c", "docker compose up -d")
 }
 
-tasks.register("shutDownContainer", Exec) {
+tasks.register("shutDownContainer", Exec::class.java) {
     commandLine("sh", "-c", "docker compose down")
 }
