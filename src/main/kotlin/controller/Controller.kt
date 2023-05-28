@@ -47,7 +47,7 @@ class Controller(private val todoDomain: TodoDomain) {
             OpenApiResponse("500")
                     ],
         path = "/todos/{id}",
-        pathParams = [OpenApiParam("id", Int::class)],
+        pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.GET]
     )
     fun get(ctx: Context) {
@@ -79,7 +79,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
         responses = [OpenApiResponse("204"), OpenApiResponse("500")],
         path = "/todos/{id}",
-        pathParams = [OpenApiParam("id", Int::class)],
+        pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.PATCH]
     )
     fun update(ctx: Context) {
@@ -99,7 +99,7 @@ class Controller(private val todoDomain: TodoDomain) {
         tags = ["Mutation"],
         responses = [OpenApiResponse("204"), OpenApiResponse("500")],
         path = "/todos/{id}",
-        pathParams = [OpenApiParam("id", Int::class)],
+        pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.DELETE]
     )
     fun delete(ctx: Context) {
