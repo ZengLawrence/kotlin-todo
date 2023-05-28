@@ -69,8 +69,13 @@ testing {
 
 val integrationTest = testing.suites.named("integrationTest")
 
+// integration test with clean up
+val integrationTestClean = tasks.register("integrationTestClean") {
+    dependsOn(integrationTest, shutDownContainer, removeImage)
+}
+
 tasks.named("check") {
-    dependsOn(integrationTest, shutDownContainer)
+    dependsOn(integrationTestClean)
 }
 
 kotlin {
@@ -94,8 +99,9 @@ tasks.register("buildImage", Exec::class.java) {
     commandLine("sh", "-c", "docker build -t kotlin-todo .")
 }
 
-tasks.register("removeImage", Exec::class.java) {
+val removeImage = tasks.register("removeImage", Exec::class.java) {
     commandLine("sh", "-c", "docker rmi kotlin-todo")
+    mustRunAfter(shutDownContainer)
 }
 
 val startContainer = tasks.register("startContainer", Exec::class.java) {
@@ -105,6 +111,5 @@ val startContainer = tasks.register("startContainer", Exec::class.java) {
 
 val shutDownContainer = tasks.register("shutDownContainer", Exec::class.java) {
     commandLine("sh", "-c", "docker compose down")
-    shouldRunAfter(startContainer)
     mustRunAfter(integrationTest)
 }
