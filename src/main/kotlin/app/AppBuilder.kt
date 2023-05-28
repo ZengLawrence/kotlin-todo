@@ -1,6 +1,5 @@
 package app
 
-import persistence.InMemoryTodoPersistence
 import persistence.RedisTodoPersistence
 import todo.TodoDomain
 import todo.TodoPersistence
@@ -15,7 +14,7 @@ interface Builder<T> {
 class AppBuilder: Builder<App> {
 
     // default db implementation to be in memory.
-    private var dbBuilder: Builder<TodoPersistence> = InMemoryDBBuilder()
+    private var dbBuilder: Builder<TodoPersistence> = RedisBuilder()
 
     override fun build(): App = App(TodoDomain(dbBuilder.build()))
 
@@ -39,8 +38,4 @@ class RedisBuilder: Builder<TodoPersistence> {
 
     override fun build(): TodoPersistence = RedisTodoPersistence.create(host, port)
 
-}
-
-class InMemoryDBBuilder: Builder<TodoPersistence> {
-    override fun build(): InMemoryTodoPersistence = InMemoryTodoPersistence()
 }
