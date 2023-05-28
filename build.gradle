@@ -1,20 +1,20 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+    id "org.jetbrains.kotlin.jvm" version "1.8.0"
     id "org.jetbrains.kotlin.kapt" version "1.8.21"
-    id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'java'
-    id 'jvm-test-suite'
+    id "application"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "java"
+    id "jvm-test-suite"
 }
 
-group 'zeng.lawrence'
-version '1.0-SNAPSHOT'
+group "zeng.lawrence"
+version "1.0-SNAPSHOT"
 
 sourceCompatibility = 11
 
 ext {
-    javalinVerison = '5.5.0'
-    openapiVersion = '5.4.2'
+    javalinVerison = "5.5.0"
+    openapiVersion = "5.4.2"
 }
 
 repositories {
@@ -29,10 +29,10 @@ dependencies {
     implementation("io.javalin:javalin-bundle:${javalinVerison}")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
-    implementation 'redis.clients:jedis:4.3.1'
+    implementation "redis.clients:jedis:4.3.1"
 
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "org.testcontainers:testcontainers:1.18.1"
     testImplementation "org.testcontainers:junit-jupiter:1.18.1"
 }
@@ -46,13 +46,13 @@ testing {
         integrationTest(JvmTestSuite) {
             dependencies {
                 implementation project()
-                implementation 'com.intuit.karate:karate-junit5:1.4.0'
+                implementation "com.intuit.karate:karate-junit5:1.4.0"
             }
 
             sources {
                 resources {
-                    srcDir file('src/integrationTest/kotlin')
-                    exclude '**/*.kt'
+                    srcDir file("src/integrationTest/kotlin")
+                    exclude "**/*.kt"
                 }
             }
 
@@ -67,7 +67,7 @@ testing {
     }
 }
 
-tasks.named('check') {
+tasks.named("check") {
     dependsOn(testing.suites.integrationTest)
 }
 
@@ -76,31 +76,31 @@ kotlin {
 }
 
 application {
-    mainClassName = 'MainKt'
+    mainClassName = "MainKt"
 }
 
-tasks.register('installRedis', Exec) {
-    commandLine 'sh', '-c', 'docker run --name todo-redis -d -p 6379:6379 redis:alpine'
+tasks.register("installRedis", Exec) {
+    commandLine "sh", "-c", "docker run --name todo-redis -d -p 6379:6379 redis:alpine"
 }
 
-tasks.register('startRedis', Exec) {
-    commandLine 'sh', '-c', 'docker start todo-redis'
+tasks.register("startRedis", Exec) {
+    commandLine "sh", "-c", "docker start todo-redis"
 }
 
-tasks.register('buildImage', Exec) {
-    dependsOn 'installDist'
-    commandLine 'sh', '-c', 'docker build -t kotlin-todo .'
+tasks.register("buildImage", Exec) {
+    dependsOn "installDist"
+    commandLine "sh", "-c", "docker build -t kotlin-todo ."
 }
 
-tasks.register('removeImage', Exec) {
-    commandLine 'sh', '-c', 'docker rmi kotlin-todo'
+tasks.register("removeImage", Exec) {
+    commandLine "sh", "-c", "docker rmi kotlin-todo"
 }
 
-tasks.register('startContainer', Exec) {
-    dependsOn 'buildImage'
-    commandLine 'sh', '-c', 'docker compose up -d'
+tasks.register("startContainer", Exec) {
+    dependsOn "buildImage"
+    commandLine "sh", "-c", "docker compose up -d"
 }
 
-tasks.register('shutDownContainer', Exec) {
-    commandLine 'sh', '-c', 'docker compose down'
+tasks.register("shutDownContainer", Exec) {
+    commandLine "sh", "-c", "docker compose down"
 }
