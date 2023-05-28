@@ -13,7 +13,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val javalinVerison by extra("5.5.0")
+val javalinVersion by extra("5.5.0")
 val openapiVersion by extra("5.4.2")
 
 repositories {
@@ -25,7 +25,7 @@ dependencies {
     // annotation processor
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$openapiVersion")
 
-    implementation("io.javalin:javalin-bundle:${javalinVerison}")
+    implementation("io.javalin:javalin-bundle:${javalinVersion}")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
     implementation("redis.clients:jedis:4.3.1")
