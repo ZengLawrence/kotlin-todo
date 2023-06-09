@@ -13,13 +13,12 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val javalinVersion by extra("5.5.0")
-val openapiVersion by extra("5.4.2")
-
 repositories {
     mavenCentral()
 }
 
+val javalinVersion: String by project
+val openapiVersion: String by project
 val exposedVersion: String by project
 dependencies {
 
