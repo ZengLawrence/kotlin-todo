@@ -1,8 +1,6 @@
-package persistence
+package todo
 
-import org.assertj.core.api.Assertions.assertThat
-import todo.PTodo
-import todo.TodoPersistence
+import org.assertj.core.api.Assertions
 import kotlin.test.Test
 
 abstract class AbstractTodoPersistenceTest {
@@ -13,39 +11,39 @@ abstract class AbstractTodoPersistenceTest {
     fun `insert multiple times should get different id each time`() {
         val id1 = persistence.insert("Buy milk", done = false)
         val id2 = persistence.insert("Get mail", done = true)
-        assertThat(id1).isNotEqualTo(id2)
+        Assertions.assertThat(id1).isNotEqualTo(id2)
     }
 
     @Test
     fun `find by id should return a todo object`() {
         val id = persistence.insert("Buy milk", done = false)
         val actual = persistence.find(id)
-        assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
+        Assertions.assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
     }
 
     @Test
     fun `find by id does not return an object`() {
-        assertThat(persistence.find(-1)).isNull()
+        Assertions.assertThat(persistence.find(-1)).isNull()
     }
 
     @Test
     fun `delete a todo should not return one`() {
         val id = persistence.insert("Buy milk", done = false)
         val actual = persistence.find(id)
-        assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
+        Assertions.assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
 
         persistence.delete(id)
-        assertThat(persistence.find(id)).isNull()
+        Assertions.assertThat(persistence.find(id)).isNull()
     }
 
     @Test
     fun `update todo to done should return with done to true`() {
         val id = persistence.insert("Buy milk", done = false)
         val actual = persistence.find(id)
-        assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
+        Assertions.assertThat(actual).isEqualTo(PTodo(id, "Buy milk", done = false))
 
         persistence.update(id, done = true)
-        assertThat(persistence.find(id)).isEqualTo(PTodo(id, "Buy milk", done = true))
+        Assertions.assertThat(persistence.find(id)).isEqualTo(PTodo(id, "Buy milk", done = true))
     }
 
     @Test
@@ -54,7 +52,7 @@ abstract class AbstractTodoPersistenceTest {
         val id2 = persistence.insert("Get newspaper", done = true)
         val id3 = persistence.insert("Eat lunch", done = false)
 
-        assertThat(persistence.findAll()).containsOnlyElementsOf(
+        Assertions.assertThat(persistence.findAll()).containsOnlyElementsOf(
             listOf(
                 PTodo(id1, "Buy milk", done = false),
                 PTodo(id2, "Get newspaper", done = true),
