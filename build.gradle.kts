@@ -30,6 +30,8 @@ dependencies {
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
     implementation("redis.clients:jedis:4.3.1")
 
+    runtimeOnly("org.postgresql:postgresql:42.6.0")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("org.testcontainers:testcontainers:1.18.1")
