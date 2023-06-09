@@ -20,6 +20,7 @@ repositories {
     mavenCentral()
 }
 
+val exposedVersion: String by project
 dependencies {
 
     // annotation processor
@@ -29,6 +30,9 @@ dependencies {
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
     implementation("redis.clients:jedis:4.3.1")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 
     runtimeOnly("org.postgresql:postgresql:42.6.0")
 
