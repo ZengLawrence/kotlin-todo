@@ -18,8 +18,8 @@ class ExposedTodoPersistence: TodoPersistence {
         }
     }
 
-    override fun delete(id: Int) {
-        TODO("Not yet implemented")
+    override fun delete(id: Int): Unit = transaction {
+        TTask.findById(id)?.delete()
     }
 
     override fun find(id: Int): PTodo? = transaction {
