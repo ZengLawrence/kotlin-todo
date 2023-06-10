@@ -26,7 +26,7 @@ class ExposedTodoPersistence: TodoPersistence {
         TTask.findById(id)?.toPTodo()
     }
 
-    override fun findAll(): List<PTodo> {
-        TODO("Not yet implemented")
+    override fun findAll(): List<PTodo> = transaction {
+        TTask.all().map(TTask::toPTodo)
     }
 }
