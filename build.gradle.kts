@@ -20,6 +20,7 @@ repositories {
 val javalinVersion: String by project
 val openapiVersion: String by project
 val exposedVersion: String by project
+val testcontainersVersion: String by project
 dependencies {
 
     // annotation processor
@@ -37,9 +38,9 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.11.1")
-    testImplementation("org.testcontainers:testcontainers:1.18.1")
-    testImplementation("org.testcontainers:junit-jupiter:1.18.1")
-    testImplementation("org.testcontainers:postgresql:1.18.3")
+    testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 
 }
 
