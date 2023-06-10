@@ -13,13 +13,14 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val javalinVersion by extra("5.5.0")
-val openapiVersion by extra("5.4.2")
-
 repositories {
     mavenCentral()
 }
 
+val javalinVersion: String by project
+val openapiVersion: String by project
+val exposedVersion: String by project
+val testcontainersVersion: String by project
 dependencies {
 
     // annotation processor
@@ -29,11 +30,18 @@ dependencies {
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
     implementation("redis.clients:jedis:4.3.1")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+
+    runtimeOnly("org.postgresql:postgresql:42.6.0")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.11.1")
-    testImplementation("org.testcontainers:testcontainers:1.18.1")
-    testImplementation("org.testcontainers:junit-jupiter:1.18.1")
+    testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+
 }
 
 testing {

@@ -1,8 +1,6 @@
-package persistence
+package todo
 
 import org.assertj.core.api.Assertions.assertThat
-import todo.PTodo
-import todo.TodoPersistence
 import kotlin.test.Test
 
 abstract class AbstractTodoPersistenceTest {
