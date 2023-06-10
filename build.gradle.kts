@@ -39,6 +39,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("org.testcontainers:testcontainers:1.18.1")
     testImplementation("org.testcontainers:junit-jupiter:1.18.1")
+    testImplementation("org.testcontainers:postgresql:1.18.3")
+
 }
 
 testing {
