@@ -12,16 +12,18 @@ class ExposedTodoPersistence: TodoPersistence {
         }.id.value
     }
 
-    override fun update(id: Int, done: Boolean) {
-        TODO("Not yet implemented")
+    override fun update(id: Int, done: Boolean): Unit = transaction {
+        TTask.findById(id)?.also {
+            it.done = done
+        }
     }
 
     override fun delete(id: Int) {
         TODO("Not yet implemented")
     }
 
-    override fun find(id: Int): PTodo? {
-        TODO("Not yet implemented")
+    override fun find(id: Int): PTodo? = transaction {
+        TTask.findById(id)?.toPTodo()
     }
 
     override fun findAll(): List<PTodo> {
