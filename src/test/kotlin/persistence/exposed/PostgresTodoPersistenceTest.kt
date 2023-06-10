@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import todo.AbstractTodoPersistenceTest
+import kotlin.random.Random
 
 class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
 
@@ -16,7 +17,7 @@ class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
     val postgres = PostgreSQLContainer("postgres:15.3")
         .withDatabaseName("todo")
         .withUsername("postgres")
-        .withPassword("postgres")
+        .withPassword(Random.nextInt(100, 99999).toString())
 
     @BeforeEach
     @Throws(Exception::class)
