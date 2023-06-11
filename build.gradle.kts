@@ -82,11 +82,15 @@ val integrationTestRedis = tasks.register("integrationTestRedis") {
 
 // integration test with clean up
 val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
-    dependsOn(integrationTestRedis, shutDownContainerRedis, removeImage)
+    dependsOn(integrationTestRedis, shutDownContainerRedis)
 }
 
 tasks.named("check") {
     dependsOn(integrationTestCleanRedis)
+}
+
+tasks.named("build") {
+    dependsOn(removeImage)
 }
 
 kotlin {
