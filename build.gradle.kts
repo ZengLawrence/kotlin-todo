@@ -109,7 +109,7 @@ tasks.register("startRedis", Exec::class.java) {
     commandLine("sh", "-c", "docker start todo-redis")
 }
 
-tasks.register("buildImage", Exec::class.java) {
+val buildImage = tasks.register("buildImage", Exec::class.java) {
     dependsOn("installDist")
     commandLine("sh", "-c", "docker build -t kotlin-todo .")
 }
@@ -120,7 +120,7 @@ val removeImage = tasks.register("removeImage", Exec::class.java) {
 }
 
 val startContainerRedis = tasks.register("startContainerRedis", Exec::class.java) {
-    dependsOn("buildImage")
+    dependsOn(buildImage)
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml up -d")
 }
 
@@ -130,7 +130,7 @@ val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::clas
 }
 
 val startContainerPostgres = tasks.register("startContainerPostgres", Exec::class.java) {
-    dependsOn("buildImage")
+    dependsOn(buildImage)
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
 }
 
