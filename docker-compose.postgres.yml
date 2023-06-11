@@ -1,0 +1,19 @@
+services:
+  app:
+    restart: on-failure:3
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USERNAME: u_postgres
+      POSTGRES_PASSWORD: p_postgres
+
+  postgres:
+    image: postgres:15.3
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: p_postgres
+      POSTGRES_USER: u_postgres
+      POSTGRES_DB: todo

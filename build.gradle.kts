@@ -128,3 +128,9 @@ val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::clas
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml down")
     mustRunAfter(integrationTestRedis)
 }
+
+val startContainerPostgres = tasks.register("startContainerPostgres", Exec::class.java) {
+    dependsOn("buildImage")
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
+}
+
