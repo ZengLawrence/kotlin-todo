@@ -66,8 +66,7 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        shouldRunAfter(test)
-                        dependsOn(startContainer)
+                        mustRunAfter(test, startContainerRedis)
                     }
                 }
             }
@@ -77,13 +76,17 @@ testing {
 
 val integrationTest = testing.suites.named("integrationTest")
 
+val integrationTestRedis = tasks.register("integrationTestRedis") {
+    dependsOn(startContainerRedis, integrationTest)
+}
+
 // integration test with clean up
-val integrationTestClean = tasks.register("integrationTestClean") {
-    dependsOn(integrationTest, shutDownContainer, removeImage)
+val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
+    dependsOn(integrationTestRedis, shutDownContainerRedis, removeImage)
 }
 
 tasks.named("check") {
-    dependsOn(integrationTestClean)
+    dependsOn(integrationTestCleanRedis)
 }
 
 kotlin {
@@ -109,15 +112,15 @@ tasks.register("buildImage", Exec::class.java) {
 
 val removeImage = tasks.register("removeImage", Exec::class.java) {
     commandLine("sh", "-c", "docker rmi kotlin-todo")
-    mustRunAfter(shutDownContainer)
+    mustRunAfter(shutDownContainerRedis)
 }
 
-val startContainer = tasks.register("startContainer", Exec::class.java) {
+val startContainerRedis = tasks.register("startContainerRedis", Exec::class.java) {
     dependsOn("buildImage")
-    commandLine("sh", "-c", "docker compose up -d")
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml up -d")
 }
 
-val shutDownContainer = tasks.register("shutDownContainer", Exec::class.java) {
-    commandLine("sh", "-c", "docker compose down")
-    mustRunAfter(integrationTest)
+val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::class.java) {
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml down")
+    mustRunAfter(integrationTestRedis)
 }
