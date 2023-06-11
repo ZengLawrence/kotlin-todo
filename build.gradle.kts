@@ -17,6 +17,14 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
 val javalinVersion: String by project
 val openapiVersion: String by project
 val exposedVersion: String by project
@@ -91,14 +99,6 @@ val check = tasks.named("check") {
 
 tasks.named("build") {
     dependsOn(removeImage)
-}
-
-kotlin {
-    jvmToolchain(11)
-}
-
-application {
-    mainClass.set("MainKt")
 }
 
 tasks.register("installRedis", Exec::class.java) {
