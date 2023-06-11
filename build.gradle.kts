@@ -74,7 +74,9 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        mustRunAfter(test, startContainerRedis, startContainerPostgres)
+                        mustRunAfter(test)
+                        shouldRunAfter(startContainerRedis, startContainerPostgres)
+                        outputs.upToDateWhen { false }
                     }
                 }
             }
@@ -94,7 +96,7 @@ val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
 }
 
 val check = tasks.named("check") {
-    dependsOn(integrationTestCleanRedis)
+    dependsOn(integrationTestCleanRedis, integrationTestCleanPostgres)
 }
 
 tasks.named("build") {
@@ -131,10 +133,12 @@ val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::clas
 
 val startContainerPostgres = tasks.register("startContainerPostgres", Exec::class.java) {
     dependsOn(buildImage)
+    mustRunAfter(integrationTestCleanRedis)
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
 }
 
 val shutDownContainerPostgres = tasks.register("shutDownContainerPostgres", Exec::class.java) {
+    mustRunAfter(integrationTestPostgres)
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
 }
 
