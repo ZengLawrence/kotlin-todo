@@ -85,7 +85,7 @@ val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
     dependsOn(integrationTestRedis, shutDownContainerRedis)
 }
 
-tasks.named("check") {
+val check = tasks.named("check") {
     dependsOn(integrationTestCleanRedis)
 }
 
@@ -116,7 +116,7 @@ tasks.register("buildImage", Exec::class.java) {
 
 val removeImage = tasks.register("removeImage", Exec::class.java) {
     commandLine("sh", "-c", "docker rmi kotlin-todo")
-    mustRunAfter(shutDownContainerRedis)
+    mustRunAfter(check)
 }
 
 val startContainerRedis = tasks.register("startContainerRedis", Exec::class.java) {
