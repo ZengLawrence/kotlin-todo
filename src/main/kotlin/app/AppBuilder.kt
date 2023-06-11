@@ -1,6 +1,8 @@
 package app
 
 import persistence.RedisTodoPersistence
+import persistence.exposed.ExposedTodoPersistence
+import persistence.exposed.ExposedTodoPersistence.Companion.setUpDbConnection
 import todo.TodoDomain
 import todo.TodoPersistence
 
@@ -21,21 +23,35 @@ class AppBuilder: Builder<App> {
     fun redis(init: RedisBuilder.() -> Unit) {
         dbBuilder = RedisBuilder().apply(init)
     }
+
+    fun postgres(init: PostgresBuilder.() -> Unit) {
+        dbBuilder = PostgresBuilder().apply(init)
+    }
 }
 
-class RedisBuilder: Builder<TodoPersistence> {
-
-    private var host: String = "localhost"
-    private var port: Int = 6379
-
-    fun host(host: String) {
-        this.host = host
-    }
-
-    fun port(port: Int) {
-        this.port = port
-    }
-
+class RedisBuilder(
+    var host: String = "localhost",
+    var port: Int = 6379
+): Builder<TodoPersistence> {
     override fun build(): TodoPersistence = RedisTodoPersistence.create(host, port)
+}
 
+class PostgresBuilder(
+    var host: String = "localhost",
+    var port: Int = 5432,
+    var db: String = "todo",
+    var username: String = "postgres"
+): Builder<TodoPersistence> {
+
+    lateinit var password: String
+
+    override fun build(): TodoPersistence {
+        setUpDbConnection(
+            jdbcUrl = "jdbc:postgresql://$host:$port/$db",
+            driver = "org.postgresql.Driver",
+            username = username,
+            password = password
+        )
+        return ExposedTodoPersistence()
+    }
 }

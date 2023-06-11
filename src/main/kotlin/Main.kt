@@ -2,10 +2,23 @@ import app.App.Companion.app
 
 fun main() {
 
+    val env = System.getenv()
     app {
-        redis {
-            host(System.getenv("REDIS_HOST") ?: "localhost")
-            port(System.getenv("REDIS_PORT")?.toInt() ?: 6379)
+
+        val postgresPassword = env["POSTGRES_PASSWORD"]
+        // only password is required for Postgres
+        if (postgresPassword != null) {
+            postgres {
+                env["POSTGRES_HOST"]?.let { host = it }
+                env["POSTGRES_PORT"]?.toInt()?.let { port = it }
+                env["POSTGRES_USERNAME"]?.let { username = it }
+                password = postgresPassword
+            }
+        } else {
+            redis {
+                env["REDIS_HOST"]?.let { host = it }
+                env["REDIS_PORT"]?.toInt()?.let { port = it }
+            }
         }
     }.build()
         .start(7070)

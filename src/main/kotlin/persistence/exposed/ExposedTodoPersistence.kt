@@ -1,5 +1,7 @@
 package persistence.exposed
 
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import todo.PTodo
 import todo.TodoPersistence
@@ -28,5 +30,26 @@ class ExposedTodoPersistence: TodoPersistence {
 
     override fun findAll(): List<PTodo> = transaction {
         TTask.all().map(TTask::toPTodo)
+    }
+
+    companion object {
+        fun setUpDbConnection(
+            jdbcUrl: String,
+            driver: String,
+            username: String,
+            password: String
+        ) {
+
+            Database.connect(
+                jdbcUrl,
+                driver = driver,
+                user = username,
+                password = password
+            )
+            transaction {
+                SchemaUtils.create(TTasks)
+            }
+
+        }
     }
 }

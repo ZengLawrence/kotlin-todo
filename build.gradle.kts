@@ -17,6 +17,14 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
 val javalinVersion: String by project
 val openapiVersion: String by project
 val exposedVersion: String by project
@@ -66,8 +74,9 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        shouldRunAfter(test)
-                        dependsOn(startContainer)
+                        mustRunAfter(test)
+                        shouldRunAfter(startContainerRedis, startContainerPostgres)
+                        outputs.upToDateWhen { false }
                     }
                 }
             }
@@ -77,21 +86,21 @@ testing {
 
 val integrationTest = testing.suites.named("integrationTest")
 
+val integrationTestRedis = tasks.register("integrationTestRedis") {
+    dependsOn(startContainerRedis, integrationTest)
+}
+
 // integration test with clean up
-val integrationTestClean = tasks.register("integrationTestClean") {
-    dependsOn(integrationTest, shutDownContainer, removeImage)
+val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
+    dependsOn(integrationTestRedis, shutDownContainerRedis)
 }
 
-tasks.named("check") {
-    dependsOn(integrationTestClean)
+val check = tasks.named("check") {
+    dependsOn(integrationTestCleanRedis, integrationTestCleanPostgres)
 }
 
-kotlin {
-    jvmToolchain(11)
-}
-
-application {
-    mainClass.set("MainKt")
+tasks.named("build") {
+    dependsOn(removeImage)
 }
 
 tasks.register("installRedis", Exec::class.java) {
@@ -102,22 +111,42 @@ tasks.register("startRedis", Exec::class.java) {
     commandLine("sh", "-c", "docker start todo-redis")
 }
 
-tasks.register("buildImage", Exec::class.java) {
+val buildImage = tasks.register("buildImage", Exec::class.java) {
     dependsOn("installDist")
     commandLine("sh", "-c", "docker build -t kotlin-todo .")
 }
 
 val removeImage = tasks.register("removeImage", Exec::class.java) {
     commandLine("sh", "-c", "docker rmi kotlin-todo")
-    mustRunAfter(shutDownContainer)
+    mustRunAfter(check)
 }
 
-val startContainer = tasks.register("startContainer", Exec::class.java) {
-    dependsOn("buildImage")
-    commandLine("sh", "-c", "docker compose up -d")
+val startContainerRedis = tasks.register("startContainerRedis", Exec::class.java) {
+    dependsOn(buildImage)
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml up -d")
 }
 
-val shutDownContainer = tasks.register("shutDownContainer", Exec::class.java) {
-    commandLine("sh", "-c", "docker compose down")
-    mustRunAfter(integrationTest)
+val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::class.java) {
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml down")
+    mustRunAfter(integrationTestRedis)
+}
+
+val startContainerPostgres = tasks.register("startContainerPostgres", Exec::class.java) {
+    dependsOn(buildImage)
+    mustRunAfter(integrationTestCleanRedis)
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
+}
+
+val shutDownContainerPostgres = tasks.register("shutDownContainerPostgres", Exec::class.java) {
+    mustRunAfter(integrationTestPostgres)
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
+}
+
+val integrationTestPostgres = tasks.register("integrationTestPostgres") {
+    dependsOn(startContainerPostgres, integrationTest)
+}
+
+// integration test with clean up
+val integrationTestCleanPostgres = tasks.register("integrationTestCleanPostgres") {
+    dependsOn(integrationTestPostgres, shutDownContainerPostgres)
 }

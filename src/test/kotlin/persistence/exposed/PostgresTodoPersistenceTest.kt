@@ -1,13 +1,10 @@
 package persistence.exposed
 
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.BeforeEach
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import persistence.exposed.ExposedTodoPersistence.Companion.setUpDbConnection
 import todo.AbstractTodoPersistenceTest
 import kotlin.random.Random
 
@@ -24,15 +21,12 @@ class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
     fun setUp() {
         postgres.start()
 
-        Database.connect(
+        setUpDbConnection(
             postgres.jdbcUrl,
             driver = "org.postgresql.Driver",
-            user = postgres.username,
+            username = postgres.username,
             password = postgres.password
         )
-        transaction {
-            SchemaUtils.create(TTasks)
-        }
 
         this.persistence = ExposedTodoPersistence()
     }
