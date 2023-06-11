@@ -74,7 +74,7 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        mustRunAfter(test, startContainerRedis)
+                        mustRunAfter(test, startContainerRedis, startContainerPostgres)
                     }
                 }
             }
@@ -136,4 +136,13 @@ val startContainerPostgres = tasks.register("startContainerPostgres", Exec::clas
 
 val shutDownContainerPostgres = tasks.register("shutDownContainerPostgres", Exec::class.java) {
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
+}
+
+val integrationTestPostgres = tasks.register("integrationTestPostgres") {
+    dependsOn(startContainerPostgres, integrationTest)
+}
+
+// integration test with clean up
+val integrationTestCleanPostgres = tasks.register("integrationTestCleanPostgres") {
+    dependsOn(integrationTestPostgres, shutDownContainerPostgres)
 }
