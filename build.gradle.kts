@@ -134,3 +134,6 @@ val startContainerPostgres = tasks.register("startContainerPostgres", Exec::clas
     commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
 }
 
+val shutDownContainerPostgres = tasks.register("shutDownContainerPostgres", Exec::class.java) {
+    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
+}
