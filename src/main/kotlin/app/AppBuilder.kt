@@ -23,19 +23,9 @@ class AppBuilder: Builder<App> {
     }
 }
 
-class RedisBuilder: Builder<TodoPersistence> {
-
-    private var host: String = "localhost"
-    private var port: Int = 6379
-
-    fun host(host: String) {
-        this.host = host
-    }
-
-    fun port(port: Int) {
-        this.port = port
-    }
-
+class RedisBuilder(
+    var host: String = "localhost",
+    var port: Int = 6379
+): Builder<TodoPersistence> {
     override fun build(): TodoPersistence = RedisTodoPersistence.create(host, port)
-
 }
