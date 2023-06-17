@@ -1,5 +1,6 @@
 package controller
 
+import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
@@ -61,6 +62,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
         responses = [
             OpenApiResponse("201", [OpenApiContent(IdDto::class)]),
+            OpenApiResponse("400"),
             OpenApiResponse("500")
                     ],
         path = "/todos",
@@ -69,8 +71,11 @@ class Controller(private val todoDomain: TodoDomain) {
     fun create(ctx: Context) {
         val request = ctx.bodyAsClass<NewTodoDto>()
         val id = todoDomain.add(request.description)
-        ctx.json(IdDto(id))
-            .status(HttpStatus.CREATED)
+        when(id) {
+            is Either.Right -> ctx.json(IdDto(id.value))
+                .status(HttpStatus.CREATED)
+            else -> ctx.status(HttpStatus.BAD_REQUEST)
+        }
     }
 
     @OpenApi(
