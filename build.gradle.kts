@@ -41,6 +41,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("io.arrow-kt:arrow-core:1.2.0-RC")
 
     runtimeOnly("org.postgresql:postgresql:42.6.0")
 
