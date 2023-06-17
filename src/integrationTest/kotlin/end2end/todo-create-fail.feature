@@ -8,3 +8,4 @@ Feature: When create fails
     And request { description: ''}
     When method POST
     Then status 400
+    And match $ contains { errorDescription: "'description' attribute can not be empty" }

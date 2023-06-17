@@ -74,7 +74,8 @@ class Controller(private val todoDomain: TodoDomain) {
         when(id) {
             is Either.Right -> ctx.json(IdDto(id.value))
                 .status(HttpStatus.CREATED)
-            else -> ctx.status(HttpStatus.BAD_REQUEST)
+            else -> ctx.json(Error("'description' attribute can not be empty"))
+                .status(HttpStatus.BAD_REQUEST)
         }
     }
 
