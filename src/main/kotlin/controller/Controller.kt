@@ -1,6 +1,7 @@
 package controller
 
 import arrow.core.Either
+import arrow.core.separateEither
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
@@ -37,7 +38,12 @@ class Controller(private val todoDomain: TodoDomain) {
         methods = [HttpMethod.GET]
     )
     fun getAll(ctx: Context) {
-        ctx.json(todoDomain.findAll().map(Todo::toDto))
+        todoDomain.findAll()
+            .map { it.map(Todo::toDto) }
+            .separateEither()
+            .also { (_, todos) ->
+                ctx.json(todos)
+            }
     }
 
     @OpenApi(
@@ -45,15 +51,24 @@ class Controller(private val todoDomain: TodoDomain) {
         tags = ["Read-only"],
         responses = [
             OpenApiResponse("200", [OpenApiContent(TodoDto::class)]),
-            OpenApiResponse("404")
+            OpenApiResponse("404"),
+            OpenApiResponse("500", description = "Could caused by persistence contains invalid error, though this is rare.")
                     ],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.GET]
     )
     fun get(ctx: Context) {
-        todoDomain.find(ctx.pathParam("id").toInt())
-            ?.also { ctx.json(it.toDto()) } ?: ctx.status(HttpStatus.NOT_FOUND)
+        val id = ctx.pathParam("id").toInt()
+        todoDomain.find(id)
+            ?.map(Todo::toDto)
+            ?.also {
+                when (it) {
+                    is Either.Right -> ctx.json(it.value)
+                    else -> ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                }
+            }
+            ?: ctx.status(HttpStatus.NOT_FOUND)
     }
 
     @OpenApi(
@@ -62,7 +77,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
         responses = [
             OpenApiResponse("201", [OpenApiContent(IdDto::class)]),
-            OpenApiResponse("400")
+            OpenApiResponse("400", [OpenApiContent(Error::class)])
                     ],
         path = "/todos",
         methods = [HttpMethod.POST]
@@ -85,7 +100,10 @@ class Controller(private val todoDomain: TodoDomain) {
         summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
-        responses = [OpenApiResponse("204")],
+        responses = [
+            OpenApiResponse("204"),
+            OpenApiResponse("400", [OpenApiContent(Error::class)])
+                    ],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.PATCH]
