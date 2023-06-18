@@ -1,12 +1,15 @@
 package controller
 
+import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import todo.EmptyTodoDescription
 import todo.Todo
 import todo.TodoDomain
+import todo.TooLongDescription
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -28,8 +31,7 @@ class Controller(private val todoDomain: TodoDomain) {
         summary = "Get all todos",
         tags = ["Read-only"],
         responses = [
-            OpenApiResponse("200", [OpenApiContent(Array<TodoDto>::class)]),
-            OpenApiResponse("500")
+            OpenApiResponse("200", [OpenApiContent(Array<TodoDto>::class)])
                     ],
         path = "/todos",
         methods = [HttpMethod.GET]
@@ -43,8 +45,7 @@ class Controller(private val todoDomain: TodoDomain) {
         tags = ["Read-only"],
         responses = [
             OpenApiResponse("200", [OpenApiContent(TodoDto::class)]),
-            OpenApiResponse("404"),
-            OpenApiResponse("500")
+            OpenApiResponse("404")
                     ],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
@@ -61,7 +62,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
         responses = [
             OpenApiResponse("201", [OpenApiContent(IdDto::class)]),
-            OpenApiResponse("500")
+            OpenApiResponse("400")
                     ],
         path = "/todos",
         methods = [HttpMethod.POST]
@@ -69,15 +70,22 @@ class Controller(private val todoDomain: TodoDomain) {
     fun create(ctx: Context) {
         val request = ctx.bodyAsClass<NewTodoDto>()
         val id = todoDomain.add(request.description)
-        ctx.json(IdDto(id))
-            .status(HttpStatus.CREATED)
+        when (id) {
+            is Either.Right -> ctx.json(IdDto(id.value))
+                .status(HttpStatus.CREATED)
+
+            is Either.Left -> when (id.value) {
+                is EmptyTodoDescription -> ctx.json(Error("'description' attribute can not be empty"))
+                is TooLongDescription -> ctx.json(Error("'description' attribute can not be longer than 100 characters"))
+            }.status(HttpStatus.BAD_REQUEST)
+        }
     }
 
     @OpenApi(
         summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
-        responses = [OpenApiResponse("204"), OpenApiResponse("500")],
+        responses = [OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.PATCH]
@@ -97,7 +105,7 @@ class Controller(private val todoDomain: TodoDomain) {
     @OpenApi(
         summary = "Delete a todo",
         tags = ["Mutation"],
-        responses = [OpenApiResponse("204"), OpenApiResponse("500")],
+        responses = [OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.DELETE]
