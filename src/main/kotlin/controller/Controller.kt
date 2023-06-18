@@ -31,8 +31,7 @@ class Controller(private val todoDomain: TodoDomain) {
         summary = "Get all todos",
         tags = ["Read-only"],
         responses = [
-            OpenApiResponse("200", [OpenApiContent(Array<TodoDto>::class)]),
-            OpenApiResponse("500")
+            OpenApiResponse("200", [OpenApiContent(Array<TodoDto>::class)])
                     ],
         path = "/todos",
         methods = [HttpMethod.GET]
@@ -46,8 +45,7 @@ class Controller(private val todoDomain: TodoDomain) {
         tags = ["Read-only"],
         responses = [
             OpenApiResponse("200", [OpenApiContent(TodoDto::class)]),
-            OpenApiResponse("404"),
-            OpenApiResponse("500")
+            OpenApiResponse("404")
                     ],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
@@ -64,8 +62,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
         responses = [
             OpenApiResponse("201", [OpenApiContent(IdDto::class)]),
-            OpenApiResponse("400"),
-            OpenApiResponse("500")
+            OpenApiResponse("400")
                     ],
         path = "/todos",
         methods = [HttpMethod.POST]
@@ -88,7 +85,7 @@ class Controller(private val todoDomain: TodoDomain) {
         summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
-        responses = [OpenApiResponse("204"), OpenApiResponse("500")],
+        responses = [OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.PATCH]
@@ -108,7 +105,7 @@ class Controller(private val todoDomain: TodoDomain) {
     @OpenApi(
         summary = "Delete a todo",
         tags = ["Mutation"],
-        responses = [OpenApiResponse("204"), OpenApiResponse("500")],
+        responses = [OpenApiResponse("204")],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.DELETE]
