@@ -7,6 +7,8 @@ import todo.Todo.Companion.validateDescription
 
 sealed interface TodoError
 object EmptyTodoDescription: TodoError
+object TooLongDescription: TodoError
+
 data class Todo(
         val id: Int,
         val description: String,
@@ -15,6 +17,7 @@ data class Todo(
     companion object {
         fun validateDescription(description: String) = either {
             ensure(description.isNotEmpty()) { EmptyTodoDescription }
+            ensure(description.length <= 100) { TooLongDescription }
             description
         }
 

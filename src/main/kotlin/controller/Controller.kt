@@ -6,8 +6,10 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import todo.EmptyTodoDescription
 import todo.Todo
 import todo.TodoDomain
+import todo.TooLongDescription
 
 data class TodoDto(val id: Int, val description: String, val done: Boolean = false)
 data class NewTodoDto(val description: String)
@@ -71,11 +73,14 @@ class Controller(private val todoDomain: TodoDomain) {
     fun create(ctx: Context) {
         val request = ctx.bodyAsClass<NewTodoDto>()
         val id = todoDomain.add(request.description)
-        when(id) {
+        when (id) {
             is Either.Right -> ctx.json(IdDto(id.value))
                 .status(HttpStatus.CREATED)
-            else -> ctx.json(Error("'description' attribute can not be empty"))
-                .status(HttpStatus.BAD_REQUEST)
+
+            is Either.Left -> when (id.value) {
+                is EmptyTodoDescription -> ctx.json(Error("'description' attribute can not be empty"))
+                is TooLongDescription -> ctx.json(Error("'description' attribute can not be longer than 100 characters"))
+            }.status(HttpStatus.BAD_REQUEST)
         }
     }
 
