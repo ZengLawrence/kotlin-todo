@@ -9,12 +9,21 @@ sealed interface TodoError
 object EmptyTodoDescription: TodoError
 object TooLongDescription: TodoError
 
-data class Todo(
+data class Todo private constructor(
         val id: Int,
         val description: String,
-        val done: Boolean = false) {
+        val done: Boolean) {
 
     companion object {
+
+        operator fun invoke(
+            id: Int,
+            description: String,
+            done: Boolean = false
+        ): Either<TodoError, Todo> = validateDescription(description).map { validatedDesc ->
+            Todo(id, validatedDesc, done)
+        }
+
         fun validateDescription(description: String) = either {
             ensure(description.isNotEmpty()) { EmptyTodoDescription }
             ensure(description.length <= 100) { TooLongDescription }
@@ -35,9 +44,9 @@ class TodoDomain(private val persistence: TodoPersistence) {
         }
 
 
-    fun find(id: Int): Todo? = persistence.find(id)?.toDomain()
+    fun find(id: Int) = persistence.find(id)?.toDomain()
 
-    fun findAll(): List<Todo> = persistence.findAll().map(PTodo::toDomain)
+    fun findAll() = persistence.findAll().map(PTodo::toDomain)
 
     fun toggleDone(id: Int, done: Boolean) {
         find(id)?.also {
