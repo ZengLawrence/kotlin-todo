@@ -77,7 +77,7 @@ class Controller(private val todoDomain: TodoDomain) {
         requestBody = OpenApiRequestBody([OpenApiContent(NewTodoDto::class)], required = true),
         responses = [
             OpenApiResponse("201", [OpenApiContent(IdDto::class)]),
-            OpenApiResponse("400")
+            OpenApiResponse("400", [OpenApiContent(Error::class)])
                     ],
         path = "/todos",
         methods = [HttpMethod.POST]
@@ -100,7 +100,10 @@ class Controller(private val todoDomain: TodoDomain) {
         summary = "Toggle done flag on a todo",
         tags = ["Mutation"],
         requestBody = OpenApiRequestBody([OpenApiContent(PatchTodoDto::class)], required = true),
-        responses = [OpenApiResponse("204")],
+        responses = [
+            OpenApiResponse("204"),
+            OpenApiResponse("400", [OpenApiContent(Error::class)])
+                    ],
         path = "/todos/{id}",
         pathParams = [OpenApiParam("id", Int::class, required = true)],
         methods = [HttpMethod.PATCH]
