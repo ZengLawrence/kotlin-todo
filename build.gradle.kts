@@ -2,8 +2,8 @@ plugins {
     java
     application
     `jvm-test-suite`
-    kotlin("jvm") version "1.8.22"
-    kotlin("kapt") version "1.8.22"
+    kotlin("jvm")
+    kotlin("kapt")
 }
 
 group = "zeng.lawrence"
