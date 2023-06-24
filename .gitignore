@@ -27,8 +27,8 @@ replay_pid*
 /.gradle
 
 # build directory
-/build
-/target/
+build/
+target/
 
 # idea
 .idea

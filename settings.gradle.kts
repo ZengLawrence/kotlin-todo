@@ -1,3 +1,6 @@
+rootProject.name = "kotlin-todo"
+include("app", "domain")
+
 pluginManagement {
     val kotlinPluginVersion: String by settings
     plugins {

@@ -34,6 +34,8 @@ dependencies {
     // annotation processor
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$openapiVersion")
 
+    implementation(project(":domain"))
+
     implementation("io.javalin:javalin-bundle:${javalinVersion}")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:${openapiVersion}")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:${openapiVersion}")
@@ -41,7 +43,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("io.arrow-kt:arrow-core:1.2.0-RC")
 
     runtimeOnly("org.postgresql:postgresql:42.6.0")
 
