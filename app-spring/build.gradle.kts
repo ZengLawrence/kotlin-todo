@@ -30,8 +30,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8") // Kotlin standard library
 
     runtimeOnly("org.postgresql:postgresql:42.6.0")
-    //runtimeOnly("com.h2database:h2")
 
+    testImplementation(project(":domain-test"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.11.1")

@@ -1,5 +1,5 @@
 rootProject.name = "kotlin-todo"
-include("app", "domain", "app-spring")
+include("app", "domain", "domain-test", "app-spring")
 
 pluginManagement {
     val kotlinPluginVersion: String by settings

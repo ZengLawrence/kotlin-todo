@@ -46,6 +46,7 @@ dependencies {
 
     runtimeOnly("org.postgresql:postgresql:42.6.0")
 
+    testImplementation(project(":domain-test"))
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")

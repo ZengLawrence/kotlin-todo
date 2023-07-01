@@ -6,6 +6,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import persistence.exposed.ExposedTodoPersistence.Companion.setUpDbConnection
 import todo.AbstractTodoPersistenceTest
+import todo.TodoPersistence
 import kotlin.random.Random
 
 class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
@@ -15,6 +16,8 @@ class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
         .withDatabaseName("todo")
         .withUsername("postgres")
         .withPassword(Random.nextInt(100, 99999).toString())
+
+    private lateinit var persistence: TodoPersistence
 
     @BeforeEach
     @Throws(Exception::class)
@@ -30,4 +33,6 @@ class PostgresTodoPersistenceTest: AbstractTodoPersistenceTest() {
 
         this.persistence = ExposedTodoPersistence()
     }
+
+    override fun persistence(): TodoPersistence = persistence
 }
