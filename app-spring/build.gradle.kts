@@ -1,7 +1,6 @@
 import  java.net.http.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile // For `KotlinCompile` task below
 import java.net.URI
-import java.time.Duration
 
 plugins {
     id("org.springframework.boot") version "3.1.1"
@@ -146,7 +145,7 @@ fun repeatHealthCheck(times: Int) {
     while (!res && remaining > 0) {
         println("App fails to start or still starting after ${times - remaining} second")
         remaining--
-        Thread.sleep(Duration.ofSeconds(1))
+        Thread.sleep(1000) // 1 second
         res = healthCheck()
     }
     if (res) {
