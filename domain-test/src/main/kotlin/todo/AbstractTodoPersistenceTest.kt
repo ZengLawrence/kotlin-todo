@@ -48,18 +48,18 @@ abstract class AbstractTodoPersistenceTest {
 
     @Test
     fun `find all should return all todos`() {
+
+        val existing = persistence().findAll()
+
         val id1 = persistence().insert("Buy milk", done = false)
         val id2 = persistence().insert("Get newspaper", done = true)
         val id3 = persistence().insert("Eat lunch", done = false)
 
-        // method may return more that what are added in this test
-        // as long as the ones added here are returned, the test is good
-        assertThat(persistence().findAll()).containsAll(
-            listOf(
-                PTodo(id1, "Buy milk", done = false),
-                PTodo(id2, "Get newspaper", done = true),
-                PTodo(id3, "Eat lunch", done = false)
-            )
+        val expected = existing + listOf(
+            PTodo(id1, "Buy milk", done = false),
+            PTodo(id2, "Get newspaper", done = true),
+            PTodo(id3, "Eat lunch", done = false)
         )
+        assertThat(persistence().findAll()).containsOnlyElementsOf(expected)
     }
 }

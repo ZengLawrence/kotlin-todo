@@ -40,8 +40,8 @@ class TodoDBServiceTest: AbstractTodoPersistenceTest() {
     }
 
     @Autowired
-    lateinit var todoRepository: TodoRepository
+    lateinit var todoDBService: TodoDBService
 
-    override fun persistence(): TodoPersistence = TodoDBService(todoRepository)
+    override fun persistence(): TodoPersistence = todoDBService
 
 }
