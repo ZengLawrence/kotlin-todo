@@ -1,0 +1,24 @@
+services:
+  app:
+    image: kotlin-todo-spring
+    restart: on-failure:3
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USERNAME: u_postgres
+      POSTGRES_PASSWORD: p_postgres
+    ports:
+      - 8080:8080
+
+  postgres:
+    image: postgres:15.3
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: p_postgres
+      POSTGRES_USER: u_postgres
+      POSTGRES_DB: todo
+    volumes:
+      - ./src/test/resources/sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
