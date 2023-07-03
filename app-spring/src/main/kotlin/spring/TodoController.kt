@@ -39,13 +39,10 @@ class TodoController(@Autowired val todoDomain: TodoDomain) {
     fun get(@PathVariable("id") id: Int): ResponseEntity<*> {
         val todo = todoDomain.find(id)
             ?.map(Todo::toDto)
-        return if (todo != null) {
-            when (todo) {
-                is Either.Right -> ResponseEntity.ok(todo.value)
-                else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-            }
-        } else {
-            ResponseEntity.notFound().build<Unit>()
+        return when (todo) {
+            is Either.Right -> ResponseEntity.ok(todo.value)
+            is Either.Left -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build<Unit>()
+            else -> ResponseEntity.notFound().build<Unit>()
         }
     }
 
@@ -65,16 +62,17 @@ class TodoController(@Autowired val todoDomain: TodoDomain) {
     }
 
     @PatchMapping("/todos/{id}")
-    fun update(@PathVariable("id") id: Int,
-               @RequestBody patchTodoDto: PatchTodoDto): ResponseEntity<*> {
-        return if (patchTodoDto.done != null) {
+    fun update(
+        @PathVariable("id") id: Int,
+        @RequestBody patchTodoDto: PatchTodoDto
+    ): ResponseEntity<*> =
+        if (patchTodoDto.done != null) {
             todoDomain.toggleDone(id, patchTodoDto.done)
             ResponseEntity.noContent().build<Unit>()
         } else {
             ResponseEntity.badRequest()
                 .body(ErrorDto("'done' attribute is not provided"))
         }
-    }
 
     @DeleteMapping("/todos/{id}")
     fun delete(@PathVariable("id") id: Int): ResponseEntity<Unit> {
