@@ -64,6 +64,7 @@ testing {
         register<JvmTestSuite>("integrationTest") {
             dependencies {
                 implementation(project())
+                implementation(project(":app-test"))
                 implementation("com.intuit.karate:karate-junit5:1.4.0")
             }
 

@@ -10,7 +10,7 @@ Feature: List all todos
       | 'Take out trash'|
       | 'Eat lunch'     |
 
-    * def result = call read('../todo-create.feature') newTodos
+    * def result = call read('classpath:todo-create.feature') newTodos
     * def created = $result[*].response
     * match each created == { id: '#number' }
 

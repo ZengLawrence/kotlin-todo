@@ -3,7 +3,7 @@ Feature: CRUD operations on a todo
   Background:
     * url baseUrl
 
-    * def result = call read('../todo-create.feature') { todoDescription: "Buy milk" }
+    * def result = call read('classpath:todo-create.feature') { todoDescription: "Buy milk" }
     * def todo = result.response
     * match todo contains { id: '#number' }
 

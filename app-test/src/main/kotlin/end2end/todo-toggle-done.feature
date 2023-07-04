@@ -3,7 +3,7 @@ Feature: Toggle done on a todo
   Background:
     * url baseUrl
 
-    * def result = call read('../todo-mark-done.feature')
+    * def result = call read('classpath:todo-mark-done.feature')
     * def todo = result.response
     * assert todo.done
 
