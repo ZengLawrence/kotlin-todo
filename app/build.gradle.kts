@@ -129,7 +129,7 @@ tasks {
     }
 
     // integration test with clean up
-    val integrationTestRedis = register("integrationTestRedis") {
+    register("integrationTestRedis") {
         group = groupName
         dependsOn(startContainerRedis, integrationTestBaseRedis, shutDownContainerRedis)
     }
@@ -161,7 +161,7 @@ tasks {
     }
 
     // integration test with clean up
-    val integrationTestPostgres = register("integrationTestPostgres") {
+    register("integrationTestPostgres") {
         group = groupName
         dependsOn(startContainerPostgres, integrationTestBasePostgres, shutDownContainerPostgres)
     }
