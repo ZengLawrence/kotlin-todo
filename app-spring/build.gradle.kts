@@ -112,13 +112,18 @@ tasks {
     val startContainer = register("startContainer", Exec::class.java) {
         dependsOn(buildImage)
         commandLine("sh", "-c", "docker compose -f docker-compose.yml up -d")
-        doLast {
-            repeatHealthCheck(30)
-        }
+    }
+
+    val waitForAppStarted = register<WaitForTask>("waitForAppStarted") {
+        condition.set { healthCheck("http://localhost:8080/actuator/health") }
+        passMessage.set("App started")
+        failMessage.set("App fails to start")
+
+        mustRunAfter(startContainer)
     }
 
     val integrationTestBase = register("integrationTestBase") {
-        mustRunAfter(startContainer)
+        mustRunAfter(waitForAppStarted)
         dependsOn(testing.suites.named("integrationTest"))
     }
 
@@ -128,7 +133,7 @@ tasks {
     }
 
     register("integrationTestClean") {
-        dependsOn(startContainer, integrationTestBase, shutDownContainer)
+        dependsOn(startContainer, waitForAppStarted, integrationTestBase, shutDownContainer)
     }
 
 }
@@ -146,33 +151,69 @@ tasks {
 
 }
 
-fun healthCheck(): Boolean {
-    val request = HttpRequest.newBuilder()
-        .uri(URI("http://localhost:8080/actuator/health"))
-        .GET()
-        .build()
-    return try {
-        HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString())
-            .statusCode() == 200
-    } catch(_: Exception) {
-        false
-    }
-}
+abstract class WaitForTask : DefaultTask() {
 
-fun repeatHealthCheck(times: Int) {
-    var res = healthCheck()
-    var remaining = times - 1
-    while (!res && remaining > 0) {
-        println("App fails to start or still starting after ${times - remaining} second")
-        remaining--
-        Thread.sleep(1000) // 1 second
-        res = healthCheck()
+    @get:Input
+    abstract val maxWaitSeconds: Property<Int>
+
+    @get:Input
+    abstract val passMessage: Property<String>
+
+    @get:Input
+    abstract val failMessage: Property<String>
+
+    @get:Input
+    abstract val condition: Property<() -> Boolean>
+
+    init {
+        maxWaitSeconds.convention(30)
+        passMessage.convention("Condition passed")
+        failMessage.convention("Condition fails")
     }
-    if (res) {
-        println("App started")
-    } else {
-        println("App fails to start after $times seconds")
-        throw IllegalStateException("App fails to start")
+    @TaskAction
+    fun waitFor() {
+        waitFor(
+            maxWaitSeconds.get(),
+            passMessage.get(),
+            failMessage.get(),
+            condition.get(),
+        )
     }
+
+    private fun waitFor(
+        maxWaitSeconds: Int,
+        passMessage: String,
+        failMessage: String,
+        condition: () -> Boolean,
+    ) {
+        var res = condition()
+        var remaining = maxWaitSeconds - 1
+        while (!res && remaining > 0) {
+            println("$failMessage after ${maxWaitSeconds - remaining} second")
+            remaining--
+            Thread.sleep(1000) // 1 second
+            res = condition()
+        }
+        if (res) {
+            println(passMessage)
+        } else {
+            println("$failMessage after $maxWaitSeconds seconds")
+            throw IllegalStateException(failMessage)
+        }
+    }
+
+    fun healthCheck(url: String): Boolean {
+        val request = HttpRequest.newBuilder()
+            .uri(URI(url))
+            .GET()
+            .build()
+        return try {
+            HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString())
+                .statusCode() == 200
+        } catch(_: Exception) {
+            false
+        }
+    }
+
 }
