@@ -79,7 +79,6 @@ testing {
                 all {
                     testTask.configure {
                         mustRunAfter(test)
-                        shouldRunAfter(startContainerRedis, startContainerPostgres)
                         outputs.upToDateWhen { false }
                     }
                 }
@@ -88,69 +87,112 @@ testing {
     }
 }
 
-val integrationTest = testing.suites.named("integrationTest")
+// build Docker image
+tasks {
 
-val integrationTestRedis = tasks.register("integrationTestRedis") {
-    dependsOn(startContainerRedis, integrationTest)
+    register("buildImage", Exec::class.java) {
+        group = "Integration Test"
+        dependsOn(installDist)
+        commandLine("sh", "-c", "docker build -t kotlin-todo .")
+    }
+
+    register("removeImage", Exec::class.java) {
+        group = "Integration Test"
+        commandLine("sh", "-c", "docker rmi kotlin-todo")
+        mustRunAfter(check)
+    }
+
+}
+val buildImage = tasks.named("buildImage")
+val removeImage = tasks.named("removeImage")
+
+// integration tests using Redis
+tasks {
+
+    val groupName = "integration test"
+    val startContainerRedis = register("startContainerRedis", Exec::class.java) {
+        group = groupName
+        dependsOn(buildImage)
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml up -d")
+    }
+
+    val integrationTestBaseRedis = register("integrationTestBaseRedis") {
+        group = groupName
+        dependsOn(testing.suites.named("integrationTest"))
+        mustRunAfter(startContainerRedis)
+    }
+
+    val shutDownContainerRedis = register("shutDownContainerRedis", Exec::class.java) {
+        group = groupName
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml down")
+        mustRunAfter(integrationTestBaseRedis)
+    }
+
+    // integration test with clean up
+    val integrationTestRedis = register("integrationTestRedis") {
+        group = groupName
+        dependsOn(startContainerRedis, integrationTestBaseRedis, shutDownContainerRedis)
+    }
+
+}
+val integrationTestRedis = tasks.named("integrationTestRedis")
+
+// integration tests using Postgres
+tasks {
+
+    val groupName = "integration test"
+    val startContainerPostgres = register("startContainerPostgres", Exec::class.java) {
+        group = groupName
+        dependsOn(buildImage)
+        mustRunAfter(integrationTestRedis)
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
+    }
+
+    val integrationTestBasePostgres = register("integrationTestBasePostgres") {
+        group = groupName
+        mustRunAfter(startContainerPostgres)
+        dependsOn(testing.suites.named("integrationTest"))
+    }
+
+    val shutDownContainerPostgres = register("shutDownContainerPostgres", Exec::class.java) {
+        group = groupName
+        mustRunAfter(integrationTestBasePostgres)
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
+    }
+
+    // integration test with clean up
+    val integrationTestPostgres = register("integrationTestPostgres") {
+        group = groupName
+        dependsOn(startContainerPostgres, integrationTestBasePostgres, shutDownContainerPostgres)
+    }
+
+}
+val integrationTestPostgres = tasks.named("integrationTestPostgres")
+
+tasks {
+
+    check {
+        dependsOn(integrationTestRedis, integrationTestPostgres)
+    }
+
+    build {
+        dependsOn(removeImage)
+    }
+
 }
 
-// integration test with clean up
-val integrationTestCleanRedis = tasks.register("integrationTestCleanRedis") {
-    dependsOn(integrationTestRedis, shutDownContainerRedis)
-}
+// dev tools tasks
+tasks {
 
-val check = tasks.named("check") {
-    dependsOn(integrationTestCleanRedis, integrationTestCleanPostgres)
-}
+    val groupName = "dev tool"
+    register("installRedis", Exec::class.java) {
+        group = groupName
+        commandLine("sh", "-c", "docker run --name todo-redis -d -p 6379:6379 redis:alpine")
+    }
 
-tasks.named("build") {
-    dependsOn(removeImage)
-}
+    register("startRedis", Exec::class.java) {
+        group = groupName
+        commandLine("sh", "-c", "docker start todo-redis")
+    }
 
-tasks.register("installRedis", Exec::class.java) {
-    commandLine("sh", "-c", "docker run --name todo-redis -d -p 6379:6379 redis:alpine")
-}
-
-tasks.register("startRedis", Exec::class.java) {
-    commandLine("sh", "-c", "docker start todo-redis")
-}
-
-val buildImage = tasks.register("buildImage", Exec::class.java) {
-    dependsOn("installDist")
-    commandLine("sh", "-c", "docker build -t kotlin-todo .")
-}
-
-val removeImage = tasks.register("removeImage", Exec::class.java) {
-    commandLine("sh", "-c", "docker rmi kotlin-todo")
-    mustRunAfter(check)
-}
-
-val startContainerRedis = tasks.register("startContainerRedis", Exec::class.java) {
-    dependsOn(buildImage)
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml up -d")
-}
-
-val shutDownContainerRedis = tasks.register("shutDownContainerRedis", Exec::class.java) {
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.redis.yml down")
-    mustRunAfter(integrationTestRedis)
-}
-
-val startContainerPostgres = tasks.register("startContainerPostgres", Exec::class.java) {
-    dependsOn(buildImage)
-    mustRunAfter(integrationTestCleanRedis)
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d")
-}
-
-val shutDownContainerPostgres = tasks.register("shutDownContainerPostgres", Exec::class.java) {
-    mustRunAfter(integrationTestPostgres)
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml -f docker-compose.postgres.yml down")
-}
-
-val integrationTestPostgres = tasks.register("integrationTestPostgres") {
-    dependsOn(startContainerPostgres, integrationTest)
-}
-
-// integration test with clean up
-val integrationTestCleanPostgres = tasks.register("integrationTestCleanPostgres") {
-    dependsOn(integrationTestPostgres, shutDownContainerPostgres)
 }

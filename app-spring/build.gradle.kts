@@ -80,7 +80,7 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        shouldRunAfter(test, startContainer)
+                        shouldRunAfter(test)
                         outputs.upToDateWhen { false }
                     }
                 }
@@ -89,41 +89,61 @@ testing {
     }
 }
 
-val integrationTest = testing.suites.named("integrationTest")
+// build Docker image
+tasks {
 
-val integrationTestClean = tasks.register("integrationTestClean") {
-    dependsOn(startContainer, integrationTest, shutDownContainer)
-}
-
-val check = tasks.named("check") {
-    dependsOn(integrationTestClean)
-}
-
-val buildImage = tasks.register("buildImage", Exec::class.java) {
-    dependsOn("installDist")
-    commandLine("sh", "-c", "docker build -t kotlin-todo-spring .")
-}
-
-val removeImage = tasks.register("removeImage", Exec::class.java) {
-    commandLine("sh", "-c", "docker rmi kotlin-todo-spring")
-    mustRunAfter(shutDownContainer)
-}
-
-val startContainer = tasks.register("startContainer", Exec::class.java) {
-    dependsOn(buildImage)
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml up -d")
-    doLast {
-        repeatHealthCheck(30)
+    register("buildImage", Exec::class.java) {
+        dependsOn(installDist)
+        commandLine("sh", "-c", "docker build -t kotlin-todo-spring .")
     }
-}
 
-val shutDownContainer = tasks.register("shutDownContainer", Exec::class.java) {
-    mustRunAfter(integrationTest)
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml down")
-}
+    register("removeImage", Exec::class.java) {
+        mustRunAfter(check)
+        commandLine("sh", "-c", "docker rmi kotlin-todo-spring")
+    }
 
-val build = tasks.named("build") {
-    dependsOn(removeImage)
+}
+val buildImage = tasks.named("buildImage")
+val removeImage = tasks.named("removeImage")
+
+// integration test
+tasks {
+
+    val startContainer = register("startContainer", Exec::class.java) {
+        dependsOn(buildImage)
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml up -d")
+        doLast {
+            repeatHealthCheck(30)
+        }
+    }
+
+    val integrationTestBase = register("integrationTestBase") {
+        mustRunAfter(startContainer)
+        dependsOn(testing.suites.named("integrationTest"))
+    }
+
+    val shutDownContainer = register("shutDownContainer", Exec::class.java) {
+        mustRunAfter(integrationTestBase)
+        commandLine("sh", "-c", "docker compose -f docker-compose.yml down")
+    }
+
+    register("integrationTestClean") {
+        dependsOn(startContainer, integrationTestBase, shutDownContainer)
+    }
+
+}
+val integrationTestClean = tasks.named("integrationTestClean")
+
+tasks {
+
+    check {
+        dependsOn(integrationTestClean)
+    }
+
+    build {
+        dependsOn(removeImage)
+    }
+
 }
 
 fun healthCheck(): Boolean {
