@@ -44,48 +44,48 @@ class TodoDomain(
     changeNotification: ChangeNotification = LoggingChangeNotification()
 ) {
 
-    private val funcPersist = FunctionalTodoPersistence(persistence)
+    private val persist = FunctionalTodoPersistence(persistence)
 
-    private val composedChangeNotification: ChangeNotification =
+    private val notification: ChangeNotification =
         IgnoreRuntimeExceptionChangeNotification(changeNotification)
 
     fun add(description: String): Either<TodoError, Int> = when (val err = validateDescription(description)) {
-        is Right -> funcPersist.insert(description, done = false)
+        is Right -> persist.insert(description, done = false)
             .onRight { id ->
-                composedChangeNotification.added(id, description)
+                notification.added(id, description)
             }
 
         is Left -> err
     }
 
-    fun find(id: Int): Either<TodoError, Todo>? = funcPersist.find(id)
+    fun find(id: Int): Either<TodoError, Todo>? = persist.find(id)
         ?.flatMap(PTodo::toDomain)
 
     fun findAll(): List<Either<TodoError, Todo>> =
-        when (val res = funcPersist.findAll()) {
+        when (val res = persist.findAll()) {
             is Right -> res.value.map(PTodo::toDomain)
             is Left -> listOf(res)
         }
 
     fun toggleDone(id: Int, done: Boolean): Either<TodoError, Unit> =
-        when (val res = find(id)) {
-            is Right -> funcPersist.update(id, done)
+        when (val err = find(id)) {
+            is Right -> persist.update(id, done)
                 .onRight {
                     if (done) {
-                        composedChangeNotification.checkedDone(id)
+                        notification.checkedDone(id)
                     } else {
-                        composedChangeNotification.uncheckedDone(id)
+                        notification.uncheckedDone(id)
                     }
                 }
 
-            is Left -> res
+            is Left -> err
             else -> Right(Unit)
         }
 
 
-    fun delete(id: Int): Either<TodoError, Unit> = funcPersist.delete(id)
+    fun delete(id: Int): Either<TodoError, Unit> = persist.delete(id)
         .onRight {
-            composedChangeNotification.deleted(id)
+            notification.deleted(id)
         }
 
 }
