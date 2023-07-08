@@ -68,8 +68,8 @@ class TodoDomain(
         }
 
     fun toggleDone(id: Int, done: Boolean): Either<TodoError, Unit> =
-        when (val err = find(id)) {
-            is Right -> persist.update(id, done)
+        persist.find(id)?.flatMap {
+            persist.update(id, done)
                 .onRight {
                     if (done) {
                         notification.checkedDone(id)
@@ -77,10 +77,7 @@ class TodoDomain(
                         notification.uncheckedDone(id)
                     }
                 }
-
-            is Left -> err
-            else -> Right(Unit)
-        }
+        } ?: Right(Unit)
 
 
     fun delete(id: Int): Either<TodoError, Unit> = persist.delete(id)
