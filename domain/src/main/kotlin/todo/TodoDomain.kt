@@ -1,6 +1,8 @@
 package todo
 
 import arrow.core.Either
+import arrow.core.Either.*
+import arrow.core.flatMap
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import todo.Todo.Companion.validateDescription
@@ -8,6 +10,7 @@ import todo.Todo.Companion.validateDescription
 sealed interface TodoError
 object EmptyTodoDescription: TodoError
 object TooLongDescription: TodoError
+data class RuntimeError(val msg: String): TodoError
 
 data class Todo private constructor(
         val id: Int,
@@ -36,24 +39,53 @@ data class Todo private constructor(
 private fun PTodo.toDomain() =
     Todo(this.id, this.description, this.done)
 
-class TodoDomain(private val persistence: TodoPersistence) {
+class TodoDomain(
+    persistence: TodoPersistence,
+    changeNotification: ChangeNotification = LoggingChangeNotification()
+) {
 
-    fun add(description: String): Either<TodoError, Int> =
-        validateDescription(description).map {
-            persistence.insert(description, done = false)
+    private val funcPersist = FunctionalTodoPersistence(persistence)
+
+    private val composedChangeNotification: ChangeNotification =
+        IgnoreRuntimeExceptionChangeNotification(changeNotification)
+
+    fun add(description: String): Either<TodoError, Int> = when (val err = validateDescription(description)) {
+        is Right -> funcPersist.insert(description, done = false)
+            .onRight { id ->
+                composedChangeNotification.added(id, description)
+            }
+
+        is Left -> err
+    }
+
+    fun find(id: Int): Either<TodoError, Todo>? = funcPersist.find(id)
+        ?.flatMap(PTodo::toDomain)
+
+    fun findAll(): List<Either<TodoError, Todo>> =
+        when (val res = funcPersist.findAll()) {
+            is Right -> res.value.map(PTodo::toDomain)
+            is Left -> listOf(res)
+        }
+
+    fun toggleDone(id: Int, done: Boolean): Either<TodoError, Unit> =
+        when (val res = find(id)) {
+            is Right -> funcPersist.update(id, done)
+                .onRight {
+                    if (done) {
+                        composedChangeNotification.checkedDone(id)
+                    } else {
+                        composedChangeNotification.uncheckedDone(id)
+                    }
+                }
+
+            is Left -> res
+            else -> Right(Unit)
         }
 
 
-    fun find(id: Int) = persistence.find(id)?.toDomain()
-
-    fun findAll() = persistence.findAll().map(PTodo::toDomain)
-
-    fun toggleDone(id: Int, done: Boolean) {
-        find(id)?.also {
-                persistence.update(id, done)
-            }
-    }
-
-    fun delete(id: Int) = persistence.delete(id)
+    fun delete(id: Int): Either<TodoError, Unit> = funcPersist.delete(id)
+        .onRight {
+            composedChangeNotification.deleted(id)
+        }
 
 }

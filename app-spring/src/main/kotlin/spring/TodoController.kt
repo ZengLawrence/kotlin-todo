@@ -57,6 +57,8 @@ class TodoController(@Autowired val todoDomain: TodoDomain) {
                     .body(ErrorDto("'description' attribute can not be empty"))
                 is TooLongDescription -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ErrorDto("'description' attribute can not be longer than 100 characters"))
+                else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build()
             }
         }
     }

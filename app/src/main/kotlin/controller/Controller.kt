@@ -91,8 +91,11 @@ class Controller(private val todoDomain: TodoDomain) {
 
             is Either.Left -> when (id.value) {
                 is EmptyTodoDescription -> ctx.json(Error("'description' attribute can not be empty"))
+                    .status(HttpStatus.BAD_REQUEST)
                 is TooLongDescription -> ctx.json(Error("'description' attribute can not be longer than 100 characters"))
-            }.status(HttpStatus.BAD_REQUEST)
+                    .status(HttpStatus.BAD_REQUEST)
+                else -> ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            }
         }
     }
 

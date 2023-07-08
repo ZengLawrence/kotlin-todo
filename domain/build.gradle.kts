@@ -20,4 +20,10 @@ kotlin {
 
 dependencies {
     api("io.arrow-kt:arrow-core:1.2.0-RC")
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.assertj:assertj-core:3.11.1")
+    testImplementation("org.mockito:mockito-core:5.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+
 }
