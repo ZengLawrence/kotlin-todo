@@ -9,6 +9,9 @@ import todo.TodoPersistence
 class ApplicationConfig {
 
     @Bean
-    fun todoDomain(todoPersistence: TodoPersistence) = TodoDomain(todoPersistence)
+    fun todoDomain(
+        todoPersistence: TodoPersistence,
+        todoChangeNotificationService: TodoChangeNotificationService
+    ) = TodoDomain(todoPersistence, todoChangeNotificationService)
 
 }

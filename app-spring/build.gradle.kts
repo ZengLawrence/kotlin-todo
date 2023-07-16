@@ -71,6 +71,7 @@ testing {
                 implementation(project())
                 implementation(project(":app-test"))
                 implementation("com.intuit.karate:karate-junit5:1.4.0")
+                implementation("org.apache.kafka:kafka-clients")
             }
 
             sources {

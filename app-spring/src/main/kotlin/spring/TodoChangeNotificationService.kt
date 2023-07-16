@@ -1,13 +1,12 @@
 package spring
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import todo.ChangeNotification
 
 @Service
 class TodoChangeNotificationService(
-    @Autowired val kafkaTemplate: KafkaTemplate<String, String>
+    private val kafkaTemplate: KafkaTemplate<String, String>
 ): ChangeNotification {
     override fun added(id: Int, description: String) {
         kafkaTemplate.send("todo_change_notification", "{id:$id,description:\"$description\",op:\"ADD\"}")
