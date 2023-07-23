@@ -2,9 +2,9 @@ package history
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import history.controller.EventController
-import history.controller.EventControllerDsl.eventController
+import history.controller.EventControllerDsl
 import history.controller.TodoController
-import history.controller.TodoControllerDsl.todoController
+import history.controller.TodoControllerDsl
 import history.domain.EventSource
 import history.domain.HistoryDomainDsl.historyDomain
 import history.domain.TodoDomainDsl.todoDomain
@@ -15,16 +15,10 @@ class AppBuilder {
 
     lateinit var eventSource: EventSource
 
-    fun start(port: Int): Javalin = create(
-        eventController {
-            historyDomain {
-                eventSource
-            }
-        }, todoController {
-            todoDomain {
-                eventSource
-            }
-        }).start(port)
+    fun start(port: Int): Javalin = createAppWith(
+        eventController(eventSource)
+        , todoController(eventSource)
+    ).start(port)
 
 
     companion object {
@@ -33,7 +27,19 @@ class AppBuilder {
     }
 }
 
-private fun create(eventController: EventController, todoController: TodoController) =
+private fun eventController(eventSource: EventSource) = EventControllerDsl.eventController {
+    historyDomain {
+        eventSource
+    }
+}
+
+private fun todoController(eventSource: EventSource) = TodoControllerDsl.todoController {
+    todoDomain {
+        eventSource
+    }
+}
+
+private fun createAppWith(eventController: EventController, todoController: TodoController) =
     Javalin.create { config ->
         with(config) {
             routing.contextPath = "/api"
