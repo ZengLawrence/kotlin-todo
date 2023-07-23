@@ -1,5 +1,7 @@
-package history.domain
+package history.controller
 
+import history.domain.Event
+import history.domain.EventSource
 import java.time.ZonedDateTime
 
 object InMemoryEventSource: EventSource {

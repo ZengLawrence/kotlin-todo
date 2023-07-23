@@ -14,12 +14,12 @@ interface HistoryDomain {
 
 object HistoryDomainDsl {
 
-    fun historyDomain(eventSource: EventSource) = object: HistoryDomain {
+    fun historyDomain(eventSource: () -> EventSource) = object: HistoryDomain {
         override fun findTodoIds(): List<Int> =
-            findTodoIds(eventSource)
+            findTodoIds(eventSource())
 
         override fun findEvents(todoId: Int): List<Event> =
-            findEvents(eventSource, todoId)
+            findEvents(eventSource(), todoId)
 
     }
 

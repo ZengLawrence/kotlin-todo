@@ -1,7 +1,9 @@
-import history.App
+import history.AppBuilder.Companion.app
+import history.controller.InMemoryEventSource
 
 fun main() {
-    val app = App.create()
-        .start(7070)
+    val app = app {
+        eventSource = InMemoryEventSource
+    }.start(7070)
 }
 
