@@ -1,7 +1,7 @@
 package history.controller
 
-import history.domain.Event
-import history.domain.HistoryDomain
+import com.fasterxml.jackson.annotation.JsonInclude
+import history.domain.*
 import io.javalin.http.Context
 import java.time.ZonedDateTime
 
@@ -9,15 +9,30 @@ data class TodoDto(
     val todoId: Int,
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class EventDto(
     val type: String,
     val timestamp: ZonedDateTime,
+    val description: String?
 )
 
-private fun Event.toEventDto() = EventDto(
-    this.type,
-    this.timestamp,
-)
+private fun Event.toEventDto(): EventDto {
+    val type = when(this) {
+        is AddEvent -> "ADD"
+        is CheckDoneEvent -> "CHECK_DONE"
+        is UncheckDoneEvent -> "UNCHECK_DONE"
+        is DeleteEvent -> "DELETE"
+    }
+    val desc = when(this) {
+        is AddEvent -> this.description
+        else -> null
+    }
+    return EventDto(
+        type,
+        this.timestamp,
+        desc,
+    )
+}
 
 interface EventController {
     fun todoIds(ctx: Context)

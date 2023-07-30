@@ -20,11 +20,20 @@ object TodoDomainDsl {
         }
 }
 
+fun AddEvent.toTodo() = Todo(
+    this.todoId,
+    this.description,
+    done = false,
+    lastUpdatedDateTime = this.timestamp,
+)
+
 private fun find(eventSource: EventSource, id: Int): Todo? =
     eventSource.findEvents(id)
-        .fold(Todo(id, "", done = false, lastUpdatedDateTime = ZonedDateTime.now())) { todo, event ->
-            when(event.type) {
-                "CHECKED_DONE" -> todo.copy(done = true, lastUpdatedDateTime = event.timestamp)
-                else -> todo.copy(lastUpdatedDateTime = event.timestamp)
+        .fold(null as Todo?) { todo, event ->
+            when(event) {
+                is AddEvent -> event.toTodo()
+                is CheckDoneEvent -> todo?.copy(done = true, lastUpdatedDateTime = event.timestamp)
+                is UncheckDoneEvent -> todo?.copy(done = false, lastUpdatedDateTime = event.timestamp)
+                is DeleteEvent -> null
             }
         }

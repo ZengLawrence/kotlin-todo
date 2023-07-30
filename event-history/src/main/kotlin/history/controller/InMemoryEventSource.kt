@@ -1,5 +1,7 @@
 package history.controller
 
+import history.domain.AddEvent
+import history.domain.CheckDoneEvent
 import history.domain.Event
 import history.domain.EventSource
 import java.time.ZonedDateTime
@@ -9,7 +11,7 @@ object InMemoryEventSource: EventSource {
         listOf(1, 2, 3)
 
     override fun findEvents(todoId: Int): List<Event> = listOf(
-        Event("ADD", ZonedDateTime.now()),
-        Event("CHECKED_DONE", ZonedDateTime.now().plusMinutes(30)),
+        AddEvent(todoId, "Buy milk", ZonedDateTime.now()),
+        CheckDoneEvent(todoId, ZonedDateTime.now().plusMinutes(30)),
     )
 }

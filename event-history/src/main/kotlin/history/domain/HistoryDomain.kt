@@ -2,10 +2,31 @@ package history.domain
 
 import java.time.ZonedDateTime
 
-data class Event(
-    val type: String,
-    val timestamp: ZonedDateTime,
-)
+sealed interface Event {
+    val todoId: Int
+    val timestamp: ZonedDateTime
+}
+
+data class AddEvent(
+    override val todoId: Int,
+    val description: String,
+    override val timestamp: ZonedDateTime,
+): Event
+
+data class CheckDoneEvent(
+    override val todoId: Int,
+    override val timestamp: ZonedDateTime,
+): Event
+
+data class UncheckDoneEvent(
+    override val todoId: Int,
+    override val timestamp: ZonedDateTime,
+): Event
+
+data class DeleteEvent(
+    override val todoId: Int,
+    override val timestamp: ZonedDateTime,
+): Event
 
 interface HistoryDomain {
     fun findTodoIds(): List<Int>
