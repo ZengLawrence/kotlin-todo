@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      context: .
+
+  kafka:
+    ports:
+      - "29092:29092"

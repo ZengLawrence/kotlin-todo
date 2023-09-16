@@ -93,51 +93,26 @@ testing {
     }
 }
 
-// build Docker image
-tasks {
-
-    register("buildImage", Exec::class.java) {
-        dependsOn(installDist)
-        commandLine("sh", "-c", "docker build -t kotlin-todo-spring .")
-    }
-
-    register("removeImage", Exec::class.java) {
-        mustRunAfter(check)
-        commandLine("sh", "-c", "docker rmi kotlin-todo-spring")
-    }
-
-}
-val buildImage = tasks.named("buildImage")
-val removeImage = tasks.named("removeImage")
-
 // integration test
 tasks {
 
     val startContainer = register("startContainer", Exec::class.java) {
-        dependsOn(buildImage)
-        commandLine("sh", "-c", "docker compose -f docker-compose.yml up -d")
-    }
-
-    val waitForAppStarted = register<WaitForTask>("waitForAppStarted") {
-        condition.set { healthCheck("http://localhost:8080/actuator/health") }
-        passMessage.set("App started")
-        failMessage.set("App fails to start")
-
-        mustRunAfter(startContainer)
+        dependsOn(installDist)
+        commandLine("sh", "-c", "docker compose up --wait --wait-timeout 120")
     }
 
     val integrationTestBase = register("integrationTestBase") {
-        mustRunAfter(waitForAppStarted)
+        mustRunAfter(startContainer)
         dependsOn(testing.suites.named("integrationTest"))
     }
 
     val shutDownContainer = register("shutDownContainer", Exec::class.java) {
         mustRunAfter(integrationTestBase)
-        commandLine("sh", "-c", "docker compose -f docker-compose.yml down")
+        commandLine("sh", "-c", "docker compose down")
     }
 
     register("integrationTestClean") {
-        dependsOn(startContainer, waitForAppStarted, integrationTestBase, shutDownContainer)
+        dependsOn(startContainer, integrationTestBase, shutDownContainer)
     }
 
 }
@@ -147,77 +122,6 @@ tasks {
 
     check {
         dependsOn(integrationTestClean)
-    }
-
-    build {
-        dependsOn(removeImage)
-    }
-
-}
-
-abstract class WaitForTask : DefaultTask() {
-
-    @get:Input
-    abstract val maxWaitSeconds: Property<Int>
-
-    @get:Input
-    abstract val passMessage: Property<String>
-
-    @get:Input
-    abstract val failMessage: Property<String>
-
-    @get:Input
-    abstract val condition: Property<() -> Boolean>
-
-    init {
-        maxWaitSeconds.convention(30)
-        passMessage.convention("Condition passed")
-        failMessage.convention("Condition fails")
-    }
-    @TaskAction
-    fun waitFor() {
-        waitFor(
-            maxWaitSeconds.get(),
-            passMessage.get(),
-            failMessage.get(),
-            condition.get(),
-        )
-    }
-
-    private fun waitFor(
-        maxWaitSeconds: Int,
-        passMessage: String,
-        failMessage: String,
-        condition: () -> Boolean,
-    ) {
-        var res = condition()
-        var remaining = maxWaitSeconds - 1
-        while (!res && remaining > 0) {
-            println("$failMessage after ${maxWaitSeconds - remaining} second")
-            remaining--
-            Thread.sleep(1000) // 1 second
-            res = condition()
-        }
-        if (res) {
-            println(passMessage)
-        } else {
-            println("$failMessage after $maxWaitSeconds seconds")
-            throw IllegalStateException(failMessage)
-        }
-    }
-
-    fun healthCheck(url: String): Boolean {
-        val request = HttpRequest.newBuilder()
-            .uri(URI(url))
-            .GET()
-            .build()
-        return try {
-            HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString())
-                .statusCode() == 200
-        } catch(_: Exception) {
-            false
-        }
     }
 
 }

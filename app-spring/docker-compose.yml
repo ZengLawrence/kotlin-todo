@@ -14,11 +14,14 @@ services:
       KAFKA_PORT: 9092
     ports:
       - 8080:8080
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 1s
+      timeout: 1s
+      retries: 120 # try for 2 minutes
 
   postgres:
     image: postgres:15.3
-    ports:
-      - 5432:5432
     environment:
       POSTGRES_PASSWORD: p_postgres
       POSTGRES_USER: u_postgres
@@ -30,8 +33,6 @@ services:
     image: confluentinc/cp-zookeeper:7.3.0
     hostname: zookeeper
     container_name: zookeeper
-    ports:
-      - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -42,8 +43,6 @@ services:
     container_name: kafka
     depends_on:
       - zookeeper
-    ports:
-      - "29092:29092"
     environment:
       KAFKA_kafka_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
